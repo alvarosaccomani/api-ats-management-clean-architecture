@@ -22,7 +22,7 @@ export class BankValue implements BankEntity {
             ban_createdat?: Date,
             ban_updatedat?: Date
         }) {
-        this.ban_uuid = ban_uuid ?? uuid();
+        this.ban_uuid = uuid();
         this.ban_name = ban_name;
         this.ban_description = ban_description ?? '';
         this.ban_createdat = ban_createdat ?? moment().toDate();
