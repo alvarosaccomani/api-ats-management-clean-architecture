@@ -43,7 +43,7 @@ export class PaymentPeriodValue implements PaymentPeriodEntity {
         this.usr_uuid = usr_uuid;
         this.crd_uuid = crd_uuid;
         this.per_uuid = per_uuid;
-        this.payp_uuid = payp_uuid ?? uuid();
+        this.payp_uuid = uuid();
         this.payp_paymentdate = payp_paymentdate ?? moment().toDate();
         this.payp_amountpaid = payp_amountpaid;
         this.paym_uuid = paym_uuid;
