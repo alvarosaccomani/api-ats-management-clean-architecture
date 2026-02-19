@@ -44,7 +44,7 @@ export class VoucherFeeValue implements VoucherFeeEntity {
         this.crd_uuid = crd_uuid;
         this.per_uuid = per_uuid;
         this.vou_uuid = vou_uuid;
-        this.vouf_uuid = vouf_uuid ?? uuid();
+        this.vouf_uuid = uuid();
         this.vouf_quotanumber = vouf_quotanumber;
         this.vouf_quotaamount = vouf_quotaamount;
         this.vouf_quotaduedate = vouf_quotaduedate;
