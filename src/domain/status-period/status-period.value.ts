@@ -22,7 +22,7 @@ export class StatusPeriodValue implements StatusPeriodEntity {
             sper_createdat?: Date,
             sper_updatedat?: Date
         }) {
-        this.sper_uuid = sper_uuid ?? uuid();
+        this.sper_uuid = uuid();
         this.sper_name = sper_name;
         this.sper_description = sper_description ?? '';
         this.sper_createdat = sper_createdat ?? moment().toDate();
