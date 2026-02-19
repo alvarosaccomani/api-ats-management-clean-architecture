@@ -22,7 +22,7 @@ export class TypeOperationValue implements TypeOperationEntity {
             tyop_createdat?: Date,
             tyop_updatedat?: Date
         }) {
-        this.tyop_uuid = tyop_uuid ?? uuid();
+        this.tyop_uuid = uuid();
         this.tyop_name = tyop_name;
         this.tyop_description = tyop_description ?? '';
         this.tyop_createdat = tyop_createdat ?? moment().toDate();
