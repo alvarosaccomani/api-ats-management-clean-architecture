@@ -79,7 +79,7 @@ export class VoucherValue implements VoucherEntity {
         this.usr_uuid = usr_uuid;
         this.crd_uuid = crd_uuid;
         this.per_uuid = per_uuid;
-        this.vou_uuid = vou_uuid ?? uuid();
+        this.vou_uuid = uuid();
         this.vou_authorizationnumber = vou_authorizationnumber;
         this.vou_transactionnumber = vou_transactionnumber;
         this.vou_datetime = vou_datetime ?? moment().toDate();
