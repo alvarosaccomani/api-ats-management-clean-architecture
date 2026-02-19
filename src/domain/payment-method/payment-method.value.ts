@@ -22,7 +22,7 @@ export class PaymentMethodValue implements PaymentMethodEntity {
             paym_createdat?: Date,
             paym_updatedat?: Date
         }) {
-        this.paym_uuid = paym_uuid ?? uuid();
+        this.paym_uuid = uuid();
         this.paym_name = paym_name;
         this.paym_description = paym_description ?? '';
         this.paym_createdat = paym_createdat ?? moment().toDate();
