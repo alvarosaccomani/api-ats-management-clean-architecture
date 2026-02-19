@@ -22,7 +22,7 @@ export class VoucherStateValue implements VoucherStateEntity {
             vous_createdat?: Date,
             vous_updatedat?: Date
         }) {
-        this.vous_uuid = vous_uuid ?? uuid();
+        this.vous_uuid = uuid();
         this.vous_name = vous_name;
         this.vous_description = vous_description ?? '';
         this.vous_createdat = vous_createdat ?? moment().toDate();
