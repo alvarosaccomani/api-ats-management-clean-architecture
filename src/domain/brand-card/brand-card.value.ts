@@ -22,7 +22,7 @@ export class BrandCardValue implements BrandCardEntity {
             brcrd_createdat?: Date,
             brcrd_updatedat?: Date
         }) {
-        this.brcrd_uuid = brcrd_uuid ?? uuid();
+        this.brcrd_uuid = uuid();
         this.brcrd_name = brcrd_name;
         this.brcrd_description = brcrd_description ?? '';
         this.brcrd_createdat = brcrd_createdat ?? moment().toDate();
