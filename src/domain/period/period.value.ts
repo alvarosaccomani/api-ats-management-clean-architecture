@@ -45,7 +45,7 @@ export class PeriodValue implements PeriodEntity {
         }) {
         this.usr_uuid = usr_uuid;
         this.crd_uuid = crd_uuid;
-        this.per_uuid = per_uuid ?? uuid();
+        this.per_uuid = uuid();
         this.per_periodnumber = per_periodnumber;
         this.per_startdate = per_startdate;
         this.per_enddate = per_enddate;
