@@ -22,7 +22,7 @@ export class VoucherFeeStatusValue implements VoucherFeeStatusEntity {
             voufs_createdat?: Date,
             voufs_updatedat?: Date
         }) {
-        this.voufs_uuid = voufs_uuid ?? uuid();
+        this.voufs_uuid = uuid();
         this.voufs_name = voufs_name;
         this.voufs_description = voufs_description ?? '';
         this.voufs_createdat = voufs_createdat ?? moment().toDate();
