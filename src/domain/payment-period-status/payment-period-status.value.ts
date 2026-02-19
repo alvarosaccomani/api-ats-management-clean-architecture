@@ -22,7 +22,7 @@ export class PaymentPeriodStatusValue implements PaymentPeriodStatusEntity {
             payps_createdat?: Date,
             payps_updatedat?: Date
         }) {
-        this.payps_uuid = payps_uuid ?? uuid();
+        this.payps_uuid = uuid();
         this.payps_name = payps_name;
         this.payps_description = payps_description ?? '';
         this.payps_createdat = payps_createdat ?? moment().toDate();
