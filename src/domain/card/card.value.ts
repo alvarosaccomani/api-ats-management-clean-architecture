@@ -44,7 +44,7 @@ export class CardValue implements CardEntity {
             crd_updatedat?: Date
         }) {
         this.usr_uuid = usr_uuid;
-        this.crd_uuid = crd_uuid ?? uuid();
+        this.crd_uuid = uuid();
         this.crd_maskedcardnumber = crd_maskedcardnumber;
         this.crd_last4digits = crd_last4digits;
         this.tycrd_uuid = tycrd_uuid;
