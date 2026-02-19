@@ -22,7 +22,7 @@ export class TypeCardValue implements TypeCardEntity {
             tycrd_createdat?: Date,
             tycrd_updatedat?: Date
         }) {
-        this.tycrd_uuid = tycrd_uuid ?? uuid();
+        this.tycrd_uuid = uuid();
         this.tycrd_name = tycrd_name;
         this.tycrd_description = tycrd_description ?? '';
         this.tycrd_createdat = tycrd_createdat ?? moment().toDate();
