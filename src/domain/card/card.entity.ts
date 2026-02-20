@@ -1,6 +1,7 @@
 import { TypeCardEntity } from '../type-card/type-card.entity';
 import { BrandCardEntity } from '../brand-card/brand-card.entity';
 import { BankEntity } from '../bank/bank.entity';
+import { PeriodEntity } from '../period/period.entity';
 
 export interface CardEntity {
     usr_uuid: string;
@@ -18,6 +19,7 @@ export interface CardEntity {
     crd_active: boolean;
     crd_createdat: Date;
     crd_updatedat: Date;
+    periods?: PeriodEntity[];
 }
 
 export type CardUpdateData = Pick<CardEntity, 
