@@ -4,6 +4,10 @@ import { CardEntity } from "../../../domain/card/card.entity";
 import { SequelizeTypeCard } from '../type-card/type-card.model';
 import { SequelizeBrandCard } from '../brand-card/brand-card.model';
 import { SequelizeBank } from '../bank/bank.model';
+import { SequelizePeriod } from '../period/period.model';
+import { BrandCardEntity } from '../../../domain/brand-card/brand-card.entity';
+import { TypeCardEntity } from '../../../domain/type-card/type-card.entity';
+import { BankEntity } from '../../../domain/bank/bank.entity';
 
 export class SequelizeCard extends Model<CardEntity, Omit<CardEntity, 'id'>> {
   declare usr_uuid: string;
@@ -11,13 +15,17 @@ export class SequelizeCard extends Model<CardEntity, Omit<CardEntity, 'id'>> {
   declare crd_maskedcardnumber: string;
   declare crd_last4digits: string;
   declare tycrd_uuid: string;
+  declare tycrd?: TypeCardEntity;
   declare brcrd_uuid: string;
+  declare brcrd?: BrandCardEntity;
   declare ban_uuid: string;
+  declare ban?: BankEntity;
   declare crd_expirationdate: Date;
   declare crd_creditlimit: number | null;
   declare crd_active: boolean;
   declare crd_createdat: Date;
   declare crd_updatedat: Date;
+  declare periods?: SequelizePeriod[];
 }
 
 SequelizeCard.init({
@@ -99,4 +107,16 @@ SequelizeCard.belongsTo(SequelizeBank, {
     foreignKey: 'ban_uuid',
     targetKey: "ban_uuid",
     as: 'ban'
+});
+
+// Sequelize Period Foreign Key
+SequelizeCard.hasMany(SequelizePeriod, {
+  foreignKey: 'usr_uuid',
+  sourceKey: 'usr_uuid',
+});
+
+SequelizeCard.hasMany(SequelizePeriod, {
+  foreignKey: 'crd_uuid',
+  sourceKey: 'crd_uuid',
+  as: 'periods'
 });
