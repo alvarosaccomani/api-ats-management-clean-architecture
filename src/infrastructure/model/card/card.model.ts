@@ -103,6 +103,10 @@ SequelizeCard.belongsTo(SequelizeBrandCard, {
 });
 
 //Sequelize Bank Foreign Key
+SequelizeCard.hasMany(SequelizeBank, {
+    foreignKey: 'usr_uuid',
+    sourceKey: 'usr_uuid'
+});
 SequelizeCard.belongsTo(SequelizeBank, {
     foreignKey: 'ban_uuid',
     targetKey: "ban_uuid",

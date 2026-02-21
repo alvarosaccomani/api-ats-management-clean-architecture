@@ -1,4 +1,5 @@
 export interface BankEntity {
+    usr_uuid: string;
     ban_uuid: string;
     ban_name: string;
     ban_description: string;

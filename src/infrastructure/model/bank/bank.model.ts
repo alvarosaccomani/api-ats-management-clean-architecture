@@ -3,6 +3,7 @@ import { sequelize } from '../../db/sequelize';
 import { BankEntity } from "../../../domain/bank/bank.entity";
 
 export class SequelizeBank extends Model<BankEntity, Omit<BankEntity, 'id'>> {
+  declare usr_uuid: string;
   declare ban_uuid: string;
   declare ban_name: string;
   declare ban_description: string;
@@ -11,6 +12,11 @@ export class SequelizeBank extends Model<BankEntity, Omit<BankEntity, 'id'>> {
 }
 
 SequelizeBank.init({
+  usr_uuid: {
+    type: DataTypes.STRING, 
+    primaryKey: true,
+    allowNull: false
+  },
   ban_uuid: {
     type: DataTypes.STRING, 
     primaryKey: true,

@@ -23,11 +23,11 @@ function configureBankRoutes(app: Express, socketAdapter: SocketAdapter) {
     
     const bankCtrl = new BankController(bankUseCase, socketAdapter);
     
-    app.get(`/${process.env.BASE_URL_API}/banks/:filter?/:page?/:perPage?`, bankCtrl.getAllCtrl);
-    app.get(`/${process.env.BASE_URL_API}/bank/:ban_uuid`, bankCtrl.getCtrl);
+    app.get(`/${process.env.BASE_URL_API}/banks/:usr_uuid/:filter?/:page?/:perPage?`, bankCtrl.getAllCtrl);
+    app.get(`/${process.env.BASE_URL_API}/bank/:usr_uuid/:ban_uuid`, bankCtrl.getCtrl);
     app.post(`/${process.env.BASE_URL_API}/bank`, bankCtrl.insertCtrl);
-    app.put(`/${process.env.BASE_URL_API}/bank/:ban_uuid`, bankCtrl.updateCtrl);
-    app.delete(`/${process.env.BASE_URL_API}/bank/:ban_uuid`, bankCtrl.deleteCtrl);
+    app.put(`/${process.env.BASE_URL_API}/bank/:usr_uuid/:ban_uuid`, bankCtrl.updateCtrl);
+    app.delete(`/${process.env.BASE_URL_API}/bank/:usr_uuid/:ban_uuid`, bankCtrl.deleteCtrl);
 }
 
 export default configureBankRoutes;

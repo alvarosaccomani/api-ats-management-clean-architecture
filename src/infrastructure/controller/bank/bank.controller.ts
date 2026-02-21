@@ -14,17 +14,18 @@ export class BankController {
 
     public async getAllCtrl(req: Request, res: Response) {
         try {
+            const usr_uuid = req.params.usr_uuid;
             const page = (req.params.page ? parseInt(req.params.page) : null);
             const perPage = (req.params.perPage ? parseInt(req.params.perPage) : null);
             if (page && perPage) {
-                const banks = await this.bankUseCase.getBanks();
+                const banks = await this.bankUseCase.getBanks(usr_uuid);
                 return res.status(200).send({
                     success: true,
                     message: 'Bancos retornados.',
                     ...paginator(banks, page.toString(), perPage.toString())
                 });
             } else {
-                const banks = await this.bankUseCase.getBanks();
+                const banks = await this.bankUseCase.getBanks(usr_uuid);
                 return res.status(200).send({
                     success: true,
                     message: 'Bancos retornados.',
@@ -43,6 +44,7 @@ export class BankController {
 
     public async getCtrl(req: Request, res: Response) {
         try {
+            const usr_uuid = req.params.usr_uuid;
             const ban_uuid = req.params.ban_uuid;
             if(!ban_uuid || ban_uuid.toLowerCase() === 'null' || ban_uuid.toLowerCase() === 'undefined') {
                 return res.status(400).json({
@@ -51,7 +53,7 @@ export class BankController {
                     error: 'Debe proporcionar un Id de banco.'
                 });
             }
-            const bank = await this.bankUseCase.getDetailBank(`${ban_uuid}`)
+            const bank = await this.bankUseCase.getDetailBank(`${usr_uuid}`, `${ban_uuid}`)
             return res.status(200).send({
                 success: true,
                 message: 'Banco retornado.',
@@ -69,6 +71,7 @@ export class BankController {
 
     public async insertCtrl({ body }: Request, res: Response) {
         try {
+            const usr_uuid = body.usr_uuid;
             const ban_name = body.ban_name;
             if(!ban_name) {
                 return res.status(400).json({
@@ -77,7 +80,7 @@ export class BankController {
                     error: 'Debe proporcionar un Nombre para el banco.'
                 })
             };
-            const bankByName = await this.bankUseCase.findBankByName(ban_name);
+            const bankByName = await this.bankUseCase.findBankByName(usr_uuid, ban_name);
             if(bankByName) {
                 return res.status(400).json({
                     success: false,
@@ -103,6 +106,7 @@ export class BankController {
 
     public async updateCtrl(req: Request, res: Response) {
         try {
+            const usr_uuid = req.params.usr_uuid;
             const ban_uuid = req.params.ban_uuid;
             const update = req.body;
             if(!update.ban_name) {
@@ -112,7 +116,7 @@ export class BankController {
                     error: 'Debe proporcionar un Nombre para el banco.'
                 })
             };
-            const bankByName = await this.bankUseCase.findBankByName(update.ban_name, ban_uuid);
+            const bankByName = await this.bankUseCase.findBankByName(usr_uuid, update.ban_name, ban_uuid);
             if(bankByName) {
                 return res.status(400).json({
                     success: false,
@@ -120,7 +124,7 @@ export class BankController {
                     error: `El nombre ${update.ban_name} de banco ya existe.`
                 });
             }
-            const bank = await this.bankUseCase.updateBank(ban_uuid, update)
+            const bank = await this.bankUseCase.updateBank(usr_uuid, ban_uuid, update)
             return res.status(200).json({
                 success: true,
                 message: 'Banco actualizado.',
@@ -138,6 +142,7 @@ export class BankController {
 
     public async deleteCtrl(req: Request, res: Response) {
         try {
+            const usr_uuid = req.params.usr_uuid;
             const ban_uuid = req.params.ban_uuid;
             if(!ban_uuid) {
                 return res.status(400).json({
@@ -146,7 +151,7 @@ export class BankController {
                     error: 'Debe proporcionar un Id de banco.'
                 });
             };
-            const bank = await this.bankUseCase.deleteBank(ban_uuid)
+            const bank = await this.bankUseCase.deleteBank(usr_uuid, ban_uuid)
             return res.status(200).json({
                 success: true,
                 message: 'Banco eliminado.',

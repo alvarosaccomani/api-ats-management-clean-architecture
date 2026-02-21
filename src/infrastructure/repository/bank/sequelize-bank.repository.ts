@@ -5,9 +5,12 @@ import { SequelizeBank } from "../../model/bank/bank.model";
 import { Op } from "sequelize";
 
 export class SequelizeBankRepository implements BankRepository {
-    async getBanks(): Promise<BankEntity[] | null> {
+    async getBanks(usr_uuid: string): Promise<BankEntity[] | null> {
         try {
             const banks = await SequelizeBank.findAll({
+                where: {
+                    usr_uuid: usr_uuid ?? null
+                },
                 order: [
                     [Sequelize.col('ban_name'), 'ASC']
                 ]
@@ -22,10 +25,11 @@ export class SequelizeBankRepository implements BankRepository {
         }
     }
 
-    async findBankById(ban_uuid: string): Promise<BankEntity | null> {
+    async findBankById(usr_uuid: string, ban_uuid: string): Promise<BankEntity | null> {
         try {
             const bank = await SequelizeBank.findOne({ 
                 where: { 
+                    usr_uuid: usr_uuid ?? null,
                     ban_uuid: ban_uuid ?? null
                 } 
             });
@@ -41,8 +45,8 @@ export class SequelizeBankRepository implements BankRepository {
 
     async createBank(bank: BankEntity): Promise<BankEntity | null> {
         try {
-            let { ban_uuid, ban_name, ban_description, ban_createdat, ban_updatedat } = bank
-            const result = await SequelizeBank.create({ ban_uuid, ban_name, ban_description, ban_createdat, ban_updatedat });
+            let { usr_uuid, ban_uuid, ban_name, ban_description, ban_createdat, ban_updatedat } = bank
+            const result = await SequelizeBank.create({ usr_uuid, ban_uuid, ban_name, ban_description, ban_createdat, ban_updatedat });
             if(!result) {
                 throw new Error(`No se ha agregado el banco`);
             }
@@ -54,7 +58,7 @@ export class SequelizeBankRepository implements BankRepository {
         }
     }
 
-    async updateBank(ban_uuid: string, bank: BankUpdateData): Promise<BankEntity | null> {
+    async updateBank(usr_uuid: string, ban_uuid: string, bank: BankUpdateData): Promise<BankEntity | null> {
         try {
             const [updatedCount, [updatedBank]] = await SequelizeBank.update(
                 {
@@ -76,10 +80,10 @@ export class SequelizeBankRepository implements BankRepository {
         }
     }
 
-    async deleteBank(ban_uuid: string): Promise<BankEntity | null> {
+    async deleteBank(usr_uuid: string, ban_uuid: string): Promise<BankEntity | null> {
         try {
-            const bank = await this.findBankById(ban_uuid);
-            const result = await SequelizeBank.destroy({ where: { ban_uuid } });
+            const bank = await this.findBankById(usr_uuid, ban_uuid);
+            const result = await SequelizeBank.destroy({ where: { usr_uuid, ban_uuid } });
             if(!result) {
                 throw new Error(`No se ha eliminado el banco`);
             };
@@ -90,9 +94,9 @@ export class SequelizeBankRepository implements BankRepository {
         }
     }
 
-    async findBankByName(ban_name: string, excludeUuid?: string | null): Promise<BankEntity | null> {
+    async findBankByName(usr_uuid: string, ban_name: string, excludeUuid?: string | null): Promise<BankEntity | null> {
         try {
-            const whereCondition: any = { ban_name: ban_name ?? null };
+            const whereCondition: any = { usr_uuid: usr_uuid ?? null, ban_name: ban_name ?? null };
             if (excludeUuid) {
                 whereCondition.ban_uuid = { [Op.ne]: excludeUuid };
             }

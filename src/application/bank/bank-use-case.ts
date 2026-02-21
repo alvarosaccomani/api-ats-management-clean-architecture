@@ -14,13 +14,14 @@ export class BankUseCase {
         this.findBankByName = this.findBankByName.bind(this);
     }
 
-    public async getBanks() {
+    public async getBanks(usr_uuid: string) {
         try {
-            const banks = await this.bankRepository.getBanks();
+            const banks = await this.bankRepository.getBanks(usr_uuid);
             if(!banks) {
                 throw new Error('No hay bancos.');
             }
             return banks.map(bank => ({
+                usr_uuid: bank.usr_uuid,
                 ban_uuid: bank.ban_uuid,
                 ban_name: bank.ban_name,
                 ban_description: bank.ban_description,
@@ -33,13 +34,14 @@ export class BankUseCase {
         }
     }
 
-    public async getDetailBank(ban_uuid: string) {
+    public async getDetailBank(usr_uuid: string, ban_uuid: string) {
         try {
-            const bank = await this.bankRepository.findBankById(ban_uuid);
+            const bank = await this.bankRepository.findBankById(usr_uuid, ban_uuid);
             if(!bank) {
                 throw new Error(`No hay banco con el Id: ${ban_uuid}`);
             }
             return {
+                usr_uuid: bank.usr_uuid,
                 ban_uuid: bank.ban_uuid,
                 ban_name: bank.ban_name,
                 ban_description: bank.ban_description,
@@ -52,14 +54,15 @@ export class BankUseCase {
         }
     }
     
-    public async createBank({ ban_uuid, ban_name, ban_description } : { ban_uuid?: string, ban_name: string, ban_description?: string }) {
+    public async createBank({ usr_uuid, ban_uuid, ban_name, ban_description } : { usr_uuid: string, ban_uuid: string, ban_name: string, ban_description?: string }) {
         try {
-            const bankValue = new BankValue({ ban_uuid, ban_name, ban_description });
+            const bankValue = new BankValue({ usr_uuid, ban_uuid, ban_name, ban_description });
             const bankCreated = await this.bankRepository.createBank(bankValue);
             if(!bankCreated) {
                 throw new Error(`No se pudo insertar el banco.`);
             }
             return {
+                usr_uuid: bankCreated.usr_uuid,
                 ban_uuid: bankCreated.ban_uuid,
                 ban_name: bankCreated.ban_name,
                 ban_description: bankCreated.ban_description,
@@ -72,13 +75,14 @@ export class BankUseCase {
         }
     }
 
-    public async updateBank(ban_uuid: string, { ban_name, ban_description } : { ban_name: string, ban_description: string }) {
+    public async updateBank(usr_uuid: string, ban_uuid: string, { ban_name, ban_description } : { ban_name: string, ban_description: string }) {
         try {
-            const bankUpdated = await this.bankRepository.updateBank(ban_uuid, { ban_name, ban_description });
+            const bankUpdated = await this.bankRepository.updateBank(usr_uuid, ban_uuid, { ban_name, ban_description });
             if(!bankUpdated) {
                 throw new Error(`No se pudo actualizar el banco.`);
             }
             return {
+                usr_uuid: bankUpdated.usr_uuid,
                 ban_uuid: bankUpdated.ban_uuid,
                 ban_name: bankUpdated.ban_name,
                 ban_description: bankUpdated.ban_description,
@@ -91,13 +95,14 @@ export class BankUseCase {
         }
     }
 
-    public async deleteBank(ban_uuid: string) {
+    public async deleteBank(usr_uuid: string, ban_uuid: string) {
         try {
-            const bankDeleted = await this.bankRepository.deleteBank(ban_uuid);
+            const bankDeleted = await this.bankRepository.deleteBank(usr_uuid, ban_uuid);
             if(!bankDeleted) {
                 throw new Error(`No se pudo eliminar el banco.`);
             }
             return {
+                usr_uuid: bankDeleted.usr_uuid,
                 ban_uuid: bankDeleted.ban_uuid,
                 ban_name: bankDeleted.ban_name,
                 ban_description: bankDeleted.ban_description,
@@ -110,9 +115,9 @@ export class BankUseCase {
         }
     }
 
-    public async findBankByName(ban_name: string, excludeUuid?: string) {
+    public async findBankByName(usr_uuid: string, ban_name: string, excludeUuid?: string) {
         try {
-            const bank = await this.bankRepository.findBankByName(ban_name, excludeUuid)
+            const bank = await this.bankRepository.findBankByName(usr_uuid, ban_name, excludeUuid)
             if(bank) {
                 throw new Error(`Ya existe un banco con el nombre ${ban_name}.`);
             }
