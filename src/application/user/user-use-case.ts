@@ -13,14 +13,10 @@ export class UserUseCase {
         this.updateUser = this.updateUser.bind(this);
         this.deleteUser = this.deleteUser.bind(this);
         this.userExist = this.userExist.bind(this);
-        this.loginUser = this.loginUser.bind(this);
         this.saveUser = this.saveUser.bind(this);
         this.setSocketUser = this.setSocketUser.bind(this);
-        this.confirmAccount = this.confirmAccount.bind(this);
-        this.forgotPassword = this.forgotPassword.bind(this);
-        this.getUserByResetToken = this.getUserByResetToken.bind(this);
         this.findUserByNick = this.findUserByNick.bind(this);
-        this.updatePassword = this.updatePassword.bind(this);
+        this.findSocketUser = this.findSocketUser.bind(this);
     }
 
     public async getUsers() {
@@ -219,19 +215,6 @@ export class UserUseCase {
         }
     }
 
-    public async loginUser(usr_nick: string, usr_password: string, gettoken: boolean) {
-        try {
-            const user = await this.userRepository.loginUser(usr_nick, usr_password, gettoken);
-            if (!user) {
-                throw new Error('Credenciales incorrectas.');
-            }
-            return user
-        } catch (error: any) {
-            console.error('Error en loginUser (use case):', error.message);
-            throw error; // Propagar el error hacia el controlador
-        }
-    }
-
     public async saveUser({ usr_uuid, usr_name, usr_surname, usr_password, usr_image, usr_email, usr_nick, usr_bio, usr_registered, usr_socket, usr_online, usr_confirmed, usr_confirmationtoken, usr_resetpasswordtoken, usr_resetpasswordexpires, usr_sysadmin } : { usr_uuid: string, usr_name: string, usr_surname: string, usr_password: string, usr_image: string, usr_email: string, usr_nick: string, usr_bio: string, usr_registered: Date, usr_socket: string, usr_online: boolean, usr_confirmed: boolean, usr_confirmationtoken: string, usr_resetpasswordtoken: string, usr_resetpasswordexpires: Date, usr_sysadmin: boolean }) {
         try {
             const userValue = new UserValue({ usr_uuid, usr_name, usr_surname, usr_password, usr_image, usr_email, usr_nick, usr_bio, usr_registered, usr_socket, usr_online, usr_confirmed, usr_confirmationtoken, usr_resetpasswordtoken, usr_resetpasswordexpires, usr_sysadmin });
@@ -274,43 +257,6 @@ export class UserUseCase {
         }
     }
 
-    public async confirmAccount( usr_confirmationtoken: string = '' ) {
-        const userConfirmation = await this.userRepository.confirmAccount(usr_confirmationtoken);
-        return userConfirmation
-    }
-
-    public async forgotPassword ( usr_email: string = '' ) {        
-        try {
-            // Buscar al usuario por su correo electrónico
-            const user = await this.userRepository.findUserByEmail(usr_email);
-
-            if (!user) {
-                throw new Error('No se encontró ningún usuario con este correo electrónico.');
-            }
-
-            const userForgotPassword = await this.userRepository.forgotPassword(user);
-            return userForgotPassword;
-        } catch (error: any) {
-            console.error('Error en forgotPassword (use case):', error.message);
-            throw error; // Propagar el error hacia el controlador
-        }
-    }
-
-    public async getUserByResetToken(token: string, expirationDate: Date) {
-        try {
-            const user = await this.userRepository.findUserByResetToken(token, expirationDate);
-
-            if (!user) {
-                throw new Error('No se encontró ningún usuario con este correo electrónico.');
-            }
-
-            return user
-        } catch (error: any) {
-            console.error('Error en getUserByResetToken (use case):', error.message);
-            throw error; // Propagar el error hacia el controlador
-        }
-    }
-
     public async findUserByNick(usr_nick: string) {
         try {
             const user = await this.userRepository.findUserByNick(usr_nick);
@@ -340,14 +286,4 @@ export class UserUseCase {
             throw error; // Propagar el error hacia el controlador
         }
     }
-
-    public async updatePassword(usr_uuid: string, newPassword: string) {
-        try {
-            await this.userRepository.updatePassword(usr_uuid, newPassword);
-        } catch (error: any) {
-            console.error('Error en updatePassword (use case):', error.message);
-            throw error; // Propagar el error hacia el controlador
-        }
-    }
-
 }

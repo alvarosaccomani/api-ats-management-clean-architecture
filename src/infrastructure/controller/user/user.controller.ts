@@ -10,11 +10,6 @@ export class UserController {
         this.insertCtrl = this.insertCtrl.bind(this);
         this.updateCtrl = this.updateCtrl.bind(this);
         this.deleteCtrl = this.deleteCtrl.bind(this);
-        this.loginCtrl = this.loginCtrl.bind(this);
-        this.saveCtrl = this.saveCtrl.bind(this);
-        this.confirmCtrl = this.confirmCtrl.bind(this);
-        this.forgotCtrl = this.forgotCtrl.bind(this);
-        this.resetCtrl = this.resetCtrl.bind(this);
     }
 
     public async getAllCtrl(req: Request, res: Response) {
@@ -170,122 +165,6 @@ export class UserController {
                 success: false,
                 message: 'No se pudo eliminar el usuario.',
                 error: error.message, // Mensaje claro del error
-            });
-        }
-    }
-
-    public async loginCtrl(req: Request, res: Response) {
-        try {
-            const { usr_user, usr_password, gettoken } = req.body;
-            const result = await this.userUseCase.loginUser(usr_user, usr_password, gettoken);
-    
-            if (typeof result === 'string') {
-                // Si el resultado es un token
-                return res.status(200).json({
-                    success: true,
-                    message: 'Inicio de sesión exitoso.',
-                    data: { token: result },
-                });
-            } else {
-                // Si el resultado es un objeto de usuario
-                return res.status(200).json({
-                    success: true,
-                    message: 'Inicio de sesión exitoso.',
-                    data: result,
-                });
-            }
-        } catch (error: any) {
-            console.error('Error en loginUser (controller):', error.message);
-            return res.status(400).json({
-                success: false,
-                message: 'No se pudo iniciar sesión.',
-                error: error.message, // Mensaje claro del error
-            });
-        }
-    }
-
-    public async saveCtrl({ body }: Request, res: Response) {
-        try {
-            const user = await this.userUseCase.saveUser(body)
-            res.send({user});
-        } catch (error: any) {
-            console.error('Error en saveCtrl (controller):', error.message);
-            return res.status(400).json({
-                success: false,
-                message: 'No se pudo crear el usuario.',
-                error: error.message, // Mensaje claro del error
-            });
-        }
-    }
-
-    public async confirmCtrl({ body }: Request, res: Response) {
-        const token = body.token;
-        const user = await this.userUseCase.confirmAccount(token)
-        res.send({user});
-    }
-
-    public async forgotCtrl({ body }: Request, res: Response) {
-        try {
-            const usr_email = body.usr_email;
-
-            if (!usr_email) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'El correo electrónico es obligatorio.',
-                });
-            }
-            const user = await this.userUseCase.forgotPassword(usr_email);
-            // Si el resultado es un objeto de usuario
-            return res.status(200).json({
-                success: true,
-                message: 'El correo electrónico fue enviado correctamente.',
-                data: user,
-            });
-        } catch (error: any) {
-            console.error('Error en forgotCtrl (controller):', error.message);
-            return res.status(400).json({
-                success: false,
-                message: 'No se pudo reestablecer la contraseña.',
-                error: error.message, // Mensaje claro del error
-            });
-        }
-    }
-
-    public async resetCtrl({ body }: Request, res: Response) {
-        try {
-            const { token, newPassword } = body;
-
-            if (!token || !newPassword) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'El token y la nueva contraseña son obligatorios.',
-                });
-            }
-
-            // Verificar que el token no haya expirado
-            const expirationDate = new Date();
-            const user = await this.userUseCase.getUserByResetToken(token, expirationDate);
-
-            if (!user) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'El token es inválido o ha expirado.',
-                });
-            }
-
-            // Actualizar la contraseña del usuario
-            await this.userUseCase.updatePassword(user.usr_uuid, newPassword);
-
-            return res.status(200).json({
-                success: true,
-                message: 'Tu contraseña ha sido restablecida con éxito.',
-            });
-
-        } catch (error: any) {
-            console.error('Error en resetCtrl (controller):', error.message);
-            return res.status(500).json({
-                success: false,
-                message: 'Ocurrió un error al procesar la solicitud.',
             });
         }
     }
