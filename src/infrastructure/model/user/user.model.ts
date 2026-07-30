@@ -2,7 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../db/sequelize';
 import { UserEntity } from "../../../domain/user/user.entity";
 
-export class SequelizeUser extends Model<UserEntity/*, Omit<UserEntity, 'id'>*/> {
+export class SequelizeUser extends Model<UserEntity> {
   declare usr_uuid: string;
   declare usr_name: string;
   declare usr_surname: string;
@@ -10,15 +10,9 @@ export class SequelizeUser extends Model<UserEntity/*, Omit<UserEntity, 'id'>*/>
   declare usr_image: string;
   declare usr_email: string;
   declare usr_nick: string;
-	declare usr_bio: string;
-	declare usr_registered: Date;
-	declare usr_socket: string;
+  declare usr_bio: string;
+  declare usr_socket: string;
   declare usr_online: boolean;
-  declare usr_confirmed: boolean;
-  declare usr_confirmationtoken: string;
-  declare usr_resetpasswordtoken: string;
-  declare usr_resetpasswordexpires: Date;
-  declare usr_sysadmin: boolean;
   declare usr_createdat: Date;
   declare usr_updatedat: Date;
 }
@@ -26,8 +20,7 @@ export class SequelizeUser extends Model<UserEntity/*, Omit<UserEntity, 'id'>*/>
 SequelizeUser.init({
   usr_uuid: {
     type: DataTypes.STRING, 
-    primaryKey: true/*,
-    autoIncrement: true*/
+    primaryKey: true
   }, 
   usr_name: {
     type: DataTypes.STRING,
@@ -53,41 +46,18 @@ SequelizeUser.init({
     type: DataTypes.STRING,
     allowNull: true
   },
-	usr_bio: {
+  usr_bio: {
     type: DataTypes.STRING,
     allowNull: true
   },
-	usr_registered: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-	usr_socket: {
+  usr_socket: {
     type: DataTypes.STRING,
     allowNull: true
   },
   usr_online: {
     type: DataTypes.BOOLEAN,
-    allowNull: false
-  },
-  usr_confirmed: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false
-  },
-  usr_confirmationtoken: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  usr_resetpasswordtoken: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  usr_resetpasswordexpires: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  usr_sysadmin: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false
+    allowNull: false,
+    defaultValue: false
   },
   usr_createdat: {
     type: DataTypes.DATE,
@@ -105,7 +75,6 @@ SequelizeUser.init({
   tableName: 'usr_users'
 });
 
-// Sincronizar (solo en desarrollo)
 if (process.env.NODE_ENV !== "production") {
     SequelizeUser.sync();
 }

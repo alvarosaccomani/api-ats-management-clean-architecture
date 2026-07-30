@@ -2,10 +2,6 @@ import * as bcrypt from "bcryptjs";
 import { UserEntity, UserUpdateData } from "../../../domain/user/user.entity";
 import { UserRepository } from "../../../domain/user/user.repository";
 import { SequelizeUser } from "../../model/user/user.model";
-import { createToken } from "../../services/jwt.service";
-import { AuthService } from '../../services/auth-service.service';
-import { EmailService } from '../../services/email-service.service';
-import { generateToken, hashToken, calculateExpiration } from '../../services/token-service.service';
 import { Op } from 'sequelize';
 
 export class SequelizeRepository implements UserRepository {
@@ -55,27 +51,27 @@ export class SequelizeRepository implements UserRepository {
     }
     async registerUser(user: UserEntity): Promise<UserEntity | null> {
         try {
-            const userCreated = await SequelizeUser.create({
-                usr_uuid: user.usr_uuid,
-                usr_name: user.usr_name,
-                usr_surname: user.usr_surname,
-                usr_password: user.usr_password,
-                usr_image: user.usr_image,
-                usr_email: user.usr_email,
-                usr_nick: user.usr_nick,
-                usr_bio: user.usr_bio,
-                usr_registered: user.usr_registered,
-                usr_socket: user.usr_socket,
-                usr_online: user.usr_online,
-                usr_confirmed: user.usr_confirmed,
-                usr_confirmationtoken: user.usr_confirmationtoken,
-                usr_resetpasswordtoken: user.usr_resetpasswordtoken,
-                usr_resetpasswordexpires: user.usr_resetpasswordexpires,
-                usr_sysadmin: user.usr_sysadmin,
-                usr_createdat: user.usr_createdat,
-                usr_updatedat: user.usr_updatedat
+            let { usr_uuid, usr_name, usr_surname, usr_password, usr_image, usr_email, usr_nick, usr_bio, usr_socket, usr_online, usr_createdat, usr_updatedat } = user;
+
+            const salt = await bcrypt.genSalt(10);
+            usr_password = await bcrypt.hash(usr_password, salt);
+
+            const result = await SequelizeUser.create({
+                usr_uuid,
+                usr_name,
+                usr_surname,
+                usr_password,
+                usr_image,
+                usr_email,
+                usr_nick,
+                usr_bio,
+                usr_socket,
+                usr_online: usr_online || false,
+                usr_createdat,
+                usr_updatedat
             });
-            return userCreated.dataValues;
+
+            return result ? (result.dataValues as any) : null;
         } catch (error: any) {
             console.error('Error en registerUser:', error.message);
             throw error;
@@ -83,19 +79,23 @@ export class SequelizeRepository implements UserRepository {
     }
     async updateUser(usr_uuid: string, user: UserUpdateData): Promise<UserEntity | null> {
         try {
+            let hashedPassword = user.usr_password;
+            if (hashedPassword) {
+                const salt = await bcrypt.genSalt(10);
+                hashedPassword = await bcrypt.hash(hashedPassword, salt);
+            }
+
             const [updatedCount, [updatedUser]] = await SequelizeUser.update(
                 { 
                     usr_name: user.usr_name,
                     usr_surname: user.usr_surname,
-                    usr_password: user.usr_password,
+                    usr_password: hashedPassword,
                     usr_image: user.usr_image,
                     usr_email: user.usr_email,
                     usr_nick: user.usr_nick,
                     usr_bio: user.usr_bio,
-                    usr_registered: user.usr_registered,
                     usr_socket: user.usr_socket,
-                    usr_online: user.usr_online,
-                    usr_sysadmin: user.usr_sysadmin
+                    usr_online: user.usr_online
                 }, 
                 { 
                     where: { usr_uuid },
@@ -145,11 +145,7 @@ export class SequelizeRepository implements UserRepository {
 
     async saveUser(user: UserEntity): Promise<UserEntity | null> {
         try {
-            
-            const authService = new AuthService(process.env.JWT_SECRET || 'default_secret');
-            const emailService = new EmailService();
-
-            let { usr_uuid, usr_name, usr_surname, usr_password, usr_image, usr_email, usr_nick, usr_bio, usr_registered, usr_socket, usr_online, usr_confirmed, usr_confirmationtoken, usr_resetpasswordtoken, usr_resetpasswordexpires, usr_sysadmin, usr_createdat, usr_updatedat } = user;
+            let { usr_uuid, usr_name, usr_surname, usr_password, usr_image, usr_email, usr_nick, usr_bio, usr_socket, usr_online, usr_createdat, usr_updatedat } = user;
 
             const userExist = await SequelizeUser.findOne({ 
                 where: {
@@ -168,43 +164,36 @@ export class SequelizeRepository implements UserRepository {
                 throw new Error(`Ya existe un usuario con el nombre: ${usr_nick} y email: ${usr_email}`);
             }
 
-            // Encriptar la contraseña
             const salt = await bcrypt.genSalt(10);
             usr_password = await bcrypt.hash(usr_password, salt);
 
-            const result = await SequelizeUser.create({ usr_uuid, usr_name, usr_surname, usr_password, usr_image, usr_email, usr_nick, usr_bio, usr_registered, usr_socket, usr_online, usr_confirmed, usr_confirmationtoken, usr_resetpasswordtoken, usr_resetpasswordexpires, usr_sysadmin, usr_createdat, usr_updatedat });
+            const result = await SequelizeUser.create({ 
+                usr_uuid, 
+                usr_name, 
+                usr_surname, 
+                usr_password, 
+                usr_image, 
+                usr_email, 
+                usr_nick, 
+                usr_bio, 
+                usr_socket, 
+                usr_online: usr_online || false, 
+                usr_createdat, 
+                usr_updatedat 
+            });
             
             if (!result) {
                 throw new Error('No se ha registrado el usuario');
             }
     
-            // Generar el token de confirmación usando AuthService
-            const confirmationToken = authService.generateConfirmationToken(usr_email);
-    
-            // Guardar el token en la base de datos (opcional)
-            await SequelizeUser.update(
-                { usr_confirmationtoken: confirmationToken },
-                { where: { usr_uuid } }
-            );
-    
-            // Enviar el correo de confirmación usando EmailService
-            try {
-                await emailService.sendConfirmationEmail(usr_email, confirmationToken);
-            } catch (emailError) {
-                console.error('Error al enviar el correo de confirmación:', emailError);
-                // No lanzamos un error aquí para permitir que el usuario sea creado
-            }
-    
-            // Devolver el nuevo usuario
             return result.dataValues as SequelizeUser;
         } catch (error: any) {
             console.error('Error al guardar el usuario:', error);
-            throw error; // La función ya devuelve una Promise, así que el error se propagará automáticamente
+            throw error;
         }
     }
     async setSocketUser( usr_uuid: string, usr_socket: string, usr_online: boolean = true ): Promise<UserEntity | null> {
         try {
-            //let { usr_uuid, usr_socket, usr_online } = user
             const result = await SequelizeUser.update({ usr_socket, usr_online }, { where: { usr_uuid } });
             const user = this.findUserById(usr_uuid);
             if(result[0] < 1) {
@@ -215,8 +204,7 @@ export class SequelizeRepository implements UserRepository {
             console.error('Error en setSocketUser:', error.message);
             throw error;
         }
-    };
-
+    }
     async findUserByNick( usr_nick: string ): Promise<UserEntity | null> {
         try {
             const user = await SequelizeUser.findOne({
@@ -237,16 +225,12 @@ export class SequelizeRepository implements UserRepository {
               },
               attributes: ["usr_socket"]
             });
-            // Si no se encuentra el usuario, retornamos null
             if (!user) {
                 return null;
             }
-
-            // Extraemos el valor del atributo "userId" y lo retornamos
             return user.getDataValue("usr_socket");
         } catch (error) {
             throw new Error('Error al buscar el socket del usuario.');
         }
     };
-
 }
