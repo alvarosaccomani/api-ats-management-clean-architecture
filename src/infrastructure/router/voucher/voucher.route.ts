@@ -1,5 +1,6 @@
 import { Express } from "express";
 import { SequelizeVoucherRepository } from "../../repository/voucher/sequelize-voucher.repository";
+import { SequelizeVoucherFeeRepository } from "../../repository/voucher-fee/sequelize-voucher-fee.repository";
 import { VoucherUseCase } from "../../../application/voucher/voucher-use-case";
 import { VoucherController } from "../../controller/voucher/voucher.controller";
 import SocketAdapter from "../../services/socketAdapter";
@@ -10,12 +11,13 @@ function configureVoucherRoutes(app: Express, socketAdapter: SocketAdapter) {
     */
     
     const sequelizeVoucherRepository = new SequelizeVoucherRepository();
+    const sequelizeVoucherFeeRepository = new SequelizeVoucherFeeRepository();
     
     /*
     *   Iniciar casos de uso
     */
     
-    const voucherUseCase = new VoucherUseCase(sequelizeVoucherRepository);
+    const voucherUseCase = new VoucherUseCase(sequelizeVoucherRepository, sequelizeVoucherFeeRepository);
     
     /*
     *   Iniciar controller

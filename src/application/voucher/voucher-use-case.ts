@@ -1,10 +1,14 @@
 import { VoucherRepository } from "../../domain/voucher/voucher.repository";
 import { VoucherValue } from "../../domain/voucher/voucher.value";
 import { TimezoneConverter } from "../../infrastructure/utils/TimezoneConverter";
+import { VoucherFeeRepository } from "../../domain/voucher-fee/voucher-fee.repository";
+import { VoucherFeeValue } from "../../domain/voucher-fee/voucher-fee.value";
+import { sequelize } from "../../infrastructure/db/sequelize";
 
 export class VoucherUseCase {
     constructor(
-        private readonly voucherRepository: VoucherRepository
+        private readonly voucherRepository: VoucherRepository,
+        private readonly voucherFeeRepository: VoucherFeeRepository
     ) {
         this.getVouchers = this.getVouchers.bind(this);
         this.getDetailVoucher = this.getDetailVoucher.bind(this);
@@ -59,6 +63,7 @@ export class VoucherUseCase {
             if(!voucher) {
                 throw new Error(`No hay comprobante con el Id: ${vou_uuid}`);
             }
+            const fees = await this.voucherFeeRepository.getVoucherFees(usr_uuid, crd_uuid, per_uuid, vou_uuid);
             return {
                 usr_uuid: voucher.usr_uuid,
                 crd_uuid: voucher.crd_uuid,
@@ -83,6 +88,17 @@ export class VoucherUseCase {
                 vou_notes: voucher.vou_notes,
                 vou_createdat: TimezoneConverter.toIsoStringInTimezone(voucher.vou_createdat, 'America/Buenos_Aires'),
                 vou_updatedat: TimezoneConverter.toIsoStringInTimezone(voucher.vou_updatedat, 'America/Buenos_Aires'),
+                fees: fees ? fees.map(f => ({
+                    usr_uuid: f.usr_uuid,
+                    crd_uuid: f.crd_uuid,
+                    per_uuid: f.per_uuid,
+                    vou_uuid: f.vou_uuid,
+                    vouf_uuid: f.vouf_uuid,
+                    vouf_quotanumber: f.vouf_quotanumber,
+                    vouf_quotaamount: f.vouf_quotaamount,
+                    vouf_quotaduedate: f.vouf_quotaduedate,
+                    voufs_uuid: f.voufs_uuid
+                })) : []
             };
         } catch (error: any) {
             console.error('Error en getDetailVoucher (use case):', error.message);
@@ -90,79 +106,30 @@ export class VoucherUseCase {
         }
     }
     
-    public async createVoucher({ 
-        usr_uuid, 
-        crd_uuid, 
-        per_uuid, 
-        vou_uuid, 
-        vou_authorizationnumber, 
-        vou_transactionnumber, 
-        vou_datetime, 
-        vou_amount, 
-        vou_currency, 
-        vou_commercename, 
-        vou_commercecuit, 
-        vou_commercecategory, 
-        tyop_uuid, 
-        vou_installments, 
-        vou_installmentcount, 
-        vou_installmentinterest, 
-        vou_poscode, 
-        vou_reference, 
-        vous_uuid, 
-        vou_image, 
-        vou_notes 
-    } : { 
-        usr_uuid: string,
-        crd_uuid: string,
-        per_uuid: string,
-        vou_uuid?: string,
-        vou_authorizationnumber: string,
-        vou_transactionnumber: string,
-        vou_datetime?: Date,
-        vou_amount: number,
-        vou_currency?: string,
-        vou_commercename: string,
-        vou_commercecuit?: string,
-        vou_commercecategory?: string,
-        tyop_uuid: string,
-        vou_installments?: boolean,
-        vou_installmentcount?: number,
-        vou_installmentinterest?: number,
-        vou_poscode?: string,
-        vou_reference?: string,
-        vous_uuid: string,
-        vou_image?: string,
-        vou_notes?: string
-    }) {
+    public async createVoucher(data: any) {
+        const t = await sequelize.transaction();
         try {
-            const voucherValue = new VoucherValue({ 
-                usr_uuid, 
-                crd_uuid, 
-                per_uuid, 
-                vou_uuid, 
-                vou_authorizationnumber, 
-                vou_transactionnumber, 
-                vou_datetime, 
-                vou_amount, 
-                vou_currency, 
-                vou_commercename, 
-                vou_commercecuit, 
-                vou_commercecategory, 
-                tyop_uuid, 
-                vou_installments, 
-                vou_installmentcount, 
-                vou_installmentinterest, 
-                vou_poscode, 
-                vou_reference, 
-                vous_uuid, 
-                vou_image, 
-                vou_notes 
-            });
-            const voucherCreated = await this.voucherRepository.createVoucher(voucherValue);
+            const voucherValue = new VoucherValue(data);
+            const voucherCreated = await this.voucherRepository.createVoucher(voucherValue, { transaction: t });
             if(!voucherCreated) {
                 throw new Error(`No se pudo insertar el comprobante.`);
             }
+
+            if(data.fees && Array.isArray(data.fees)) {
+                for (const fee of data.fees) {
+                    const feeValue = new VoucherFeeValue({
+                        ...fee,
+                        usr_uuid: voucherCreated.usr_uuid,
+                        crd_uuid: voucherCreated.crd_uuid,
+                        per_uuid: voucherCreated.per_uuid,
+                        vou_uuid: voucherCreated.vou_uuid
+                    });
+                    await this.voucherFeeRepository.createVoucherFee(feeValue, { transaction: t });
+                }
+            }
+
+            await t.commit();
+
             return {
                 usr_uuid: voucherCreated.usr_uuid,
                 crd_uuid: voucherCreated.crd_uuid,
@@ -189,71 +156,53 @@ export class VoucherUseCase {
                 vou_updatedat: TimezoneConverter.toIsoStringInTimezone(voucherCreated.vou_updatedat, 'America/Buenos_Aires'),
             };
         } catch (error: any) {
+            await t.rollback();
             console.error('Error en createVoucher (use case):', error.message);
             throw error;
         }
     }
 
-    public async updateVoucher(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, { 
-        vou_authorizationnumber, 
-        vou_transactionnumber, 
-        vou_datetime, 
-        vou_amount, 
-        vou_currency, 
-        vou_commercename, 
-        vou_commercecuit, 
-        vou_commercecategory, 
-        tyop_uuid, 
-        vou_installments, 
-        vou_installmentcount, 
-        vou_installmentinterest, 
-        vou_poscode, 
-        vou_reference, 
-        vous_uuid, 
-        vou_image, 
-        vou_notes 
-    } : { 
-        vou_authorizationnumber: string,
-        vou_transactionnumber: string,
-        vou_datetime: Date,
-        vou_amount: number,
-        vou_currency: string,
-        vou_commercename: string,
-        vou_commercecuit: string,
-        vou_commercecategory: string,
-        tyop_uuid: string,
-        vou_installments: boolean,
-        vou_installmentcount: number,
-        vou_installmentinterest: number,
-        vou_poscode: string,
-        vou_reference: string,
-        vous_uuid: string,
-        vou_image: string,
-        vou_notes: string
-    }) {
+    public async updateVoucher(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, data: any) {
+        const t = await sequelize.transaction();
         try {
-            const voucherUpdated = await this.voucherRepository.updateVoucher(usr_uuid, crd_uuid, per_uuid, vou_uuid, { 
-                vou_authorizationnumber, 
-                vou_transactionnumber, 
-                vou_datetime, 
-                vou_amount, 
-                vou_currency, 
-                vou_commercename, 
-                vou_commercecuit, 
-                vou_commercecategory, 
-                tyop_uuid, 
-                vou_installments, 
-                vou_installmentcount, 
-                vou_installmentinterest, 
-                vou_poscode, 
-                vou_reference, 
-                vous_uuid, 
-                vou_image, 
-                vou_notes 
-            });
+            const voucherUpdated = await this.voucherRepository.updateVoucher(usr_uuid, crd_uuid, per_uuid, vou_uuid, data, { transaction: t });
             if(!voucherUpdated) {
                 throw new Error(`No se pudo actualizar el comprobante.`);
             }
+
+            if(data.fees && Array.isArray(data.fees)) {
+                // A) Consultar los detalles existentes en la base de datos
+                const existingFees = await this.voucherFeeRepository.getVoucherFees(usr_uuid, crd_uuid, per_uuid, vou_uuid, { transaction: t }) || [];
+
+                // B) Comparar los IDs existentes contra los IDs de los detalles recibidos
+                const incomingIds = data.fees.map((f: any) => f.vouf_uuid).filter(Boolean);
+
+                // C) Eliminar físicamente aquellos detalles que ya no figuran
+                const orphans = existingFees.filter((f: any) => !incomingIds.includes(f.vouf_uuid));
+                for(const orphan of orphans) {
+                    await this.voucherFeeRepository.deleteVoucherFee(usr_uuid, crd_uuid, per_uuid, vou_uuid, orphan.vouf_uuid, { transaction: t });
+                }
+
+                // D) Crear o actualizar los detalles recibidos
+                for(const fee of data.fees) {
+                    const isExisting = fee.vouf_uuid && existingFees.some((ef: any) => ef.vouf_uuid === fee.vouf_uuid);
+                    if(isExisting) {
+                        await this.voucherFeeRepository.updateVoucherFee(usr_uuid, crd_uuid, per_uuid, vou_uuid, fee.vouf_uuid, fee, { transaction: t });
+                    } else {
+                        const newFee = new VoucherFeeValue({
+                            ...fee,
+                            usr_uuid,
+                            crd_uuid,
+                            per_uuid,
+                            vou_uuid
+                        });
+                        await this.voucherFeeRepository.createVoucherFee(newFee, { transaction: t });
+                    }
+                }
+            }
+
+            await t.commit();
+
             return {
                 usr_uuid: voucherUpdated.usr_uuid,
                 crd_uuid: voucherUpdated.crd_uuid,
@@ -280,17 +229,27 @@ export class VoucherUseCase {
                 vou_updatedat: TimezoneConverter.toIsoStringInTimezone(voucherUpdated.vou_updatedat, 'America/Buenos_Aires'),
             };
         } catch (error: any) {
+            await t.rollback();
             console.error('Error en updateVoucher (use case):', error.message);
             throw error;
         }
     }
 
     public async deleteVoucher(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string) {
+        const t = await sequelize.transaction();
         try {
-            const voucherDeleted = await this.voucherRepository.deleteVoucher(usr_uuid, crd_uuid, per_uuid, vou_uuid);
+            // First delete associated fees
+            const fees = await this.voucherFeeRepository.getVoucherFees(usr_uuid, crd_uuid, per_uuid, vou_uuid, { transaction: t }) || [];
+            for (const fee of fees) {
+                await this.voucherFeeRepository.deleteVoucherFee(usr_uuid, crd_uuid, per_uuid, vou_uuid, fee.vouf_uuid, { transaction: t });
+            }
+
+            const voucherDeleted = await this.voucherRepository.deleteVoucher(usr_uuid, crd_uuid, per_uuid, vou_uuid, { transaction: t });
             if(!voucherDeleted) {
                 throw new Error(`No se pudo eliminar el comprobante.`);
             }
+
+            await t.commit();
             return {
                 usr_uuid: voucherDeleted.usr_uuid,
                 crd_uuid: voucherDeleted.crd_uuid,
@@ -317,6 +276,7 @@ export class VoucherUseCase {
                 vou_updatedat: TimezoneConverter.toIsoStringInTimezone(voucherDeleted.vou_updatedat, 'America/Buenos_Aires'),
             };
         } catch (error: any) {
+            await t.rollback();
             console.error('Error en deleteVoucher (use case):', error.message);
             throw error;
         }

@@ -7,7 +7,7 @@ import { SequelizeTypeOperation } from '../../model/type-operation/type-operatio
 import { SequelizeVoucherState } from '../../model/voucher-state/voucher-state.model';
 
 export class SequelizeVoucherRepository implements VoucherRepository {
-    async getVouchers(usr_uuid: string, crd_uuid: string, per_uuid: string): Promise<VoucherEntity[] | null> {
+    async getVouchers(usr_uuid: string, crd_uuid: string, per_uuid: string, options?: { transaction?: any }): Promise<VoucherEntity[] | null> {
         try {
             const vouchers = await SequelizeVoucher.findAll({
                 where: {
@@ -27,7 +27,8 @@ export class SequelizeVoucherRepository implements VoucherRepository {
                 ],
                 order: [
                     [Sequelize.col('vou_datetime'), 'DESC']
-                ]
+                ],
+                transaction: options?.transaction
             });
             if(!vouchers) {
                 throw new Error(`No hay comprobantes`)
@@ -39,7 +40,7 @@ export class SequelizeVoucherRepository implements VoucherRepository {
         }
     }
 
-    async findVoucherById(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string): Promise<VoucherEntity | null> {
+    async findVoucherById(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, options?: { transaction?: any }): Promise<VoucherEntity | null> {
         try {
             const voucher = await SequelizeVoucher.findOne({ 
                 where: { 
@@ -47,7 +48,8 @@ export class SequelizeVoucherRepository implements VoucherRepository {
                     crd_uuid: crd_uuid ?? null,
                     per_uuid: per_uuid ?? null,
                     vou_uuid: vou_uuid ?? null
-                } 
+                },
+                transaction: options?.transaction
             });
             if(!voucher) {
                 throw new Error(`No hay comprobante con el Id: ${vou_uuid}`);
@@ -59,10 +61,13 @@ export class SequelizeVoucherRepository implements VoucherRepository {
         }
     }
 
-    async createVoucher(voucher: VoucherEntity): Promise<VoucherEntity | null> {
+    async createVoucher(voucher: VoucherEntity, options?: { transaction?: any }): Promise<VoucherEntity | null> {
         try {
             let { usr_uuid, crd_uuid, per_uuid, vou_uuid, vou_authorizationnumber, vou_transactionnumber, vou_datetime, vou_amount, vou_currency, vou_commercename, vou_commercecuit, vou_commercecategory, tyop_uuid, vou_installments, vou_installmentcount, vou_installmentinterest, vou_poscode, vou_reference, vous_uuid, vou_image, vou_notes, vou_createdat, vou_updatedat } = voucher
-            const result = await SequelizeVoucher.create({ usr_uuid, crd_uuid, per_uuid, vou_uuid, vou_authorizationnumber, vou_transactionnumber, vou_datetime, vou_amount, vou_currency, vou_commercename, vou_commercecuit, vou_commercecategory, tyop_uuid, vou_installments, vou_installmentcount, vou_installmentinterest, vou_poscode, vou_reference, vous_uuid, vou_image, vou_notes, vou_createdat, vou_updatedat });
+            const result = await SequelizeVoucher.create(
+                { usr_uuid, crd_uuid, per_uuid, vou_uuid, vou_authorizationnumber, vou_transactionnumber, vou_datetime, vou_amount, vou_currency, vou_commercename, vou_commercecuit, vou_commercecategory, tyop_uuid, vou_installments, vou_installmentcount, vou_installmentinterest, vou_poscode, vou_reference, vous_uuid, vou_image, vou_notes, vou_createdat, vou_updatedat },
+                { transaction: options?.transaction }
+            );
             if(!result) {
                 throw new Error(`No se ha agregado el comprobante`);
             }
@@ -74,7 +79,7 @@ export class SequelizeVoucherRepository implements VoucherRepository {
         }
     }
 
-    async updateVoucher(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, voucher: VoucherUpdateData): Promise<VoucherEntity | null> {
+    async updateVoucher(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, voucher: VoucherUpdateData, options?: { transaction?: any }): Promise<VoucherEntity | null> {
         try {
             const [updatedCount, [updatedVoucher]] = await SequelizeVoucher.update(
                 {
@@ -99,6 +104,7 @@ export class SequelizeVoucherRepository implements VoucherRepository {
                 {
                     where: { usr_uuid, crd_uuid, per_uuid, vou_uuid },
                     returning: true,
+                    transaction: options?.transaction
                 }
             );
             if (updatedCount === 0) {
@@ -111,10 +117,13 @@ export class SequelizeVoucherRepository implements VoucherRepository {
         }
     }
 
-    async deleteVoucher(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string): Promise<VoucherEntity | null> {
+    async deleteVoucher(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, options?: { transaction?: any }): Promise<VoucherEntity | null> {
         try {
-            const voucher = await this.findVoucherById(usr_uuid, crd_uuid, per_uuid, vou_uuid);
-            const result = await SequelizeVoucher.destroy({ where: { usr_uuid, crd_uuid, per_uuid, vou_uuid } });
+            const voucher = await this.findVoucherById(usr_uuid, crd_uuid, per_uuid, vou_uuid, options);
+            const result = await SequelizeVoucher.destroy({ 
+                where: { usr_uuid, crd_uuid, per_uuid, vou_uuid },
+                transaction: options?.transaction
+            });
             if(!result) {
                 throw new Error(`No se ha eliminado el comprobante`);
             };
@@ -125,12 +134,13 @@ export class SequelizeVoucherRepository implements VoucherRepository {
         }
     }
 
-    async findVoucherByTransactionNumber(vou_transactionnumber: string): Promise<VoucherEntity | null> {
+    async findVoucherByTransactionNumber(vou_transactionnumber: string, options?: { transaction?: any }): Promise<VoucherEntity | null> {
         try {
             const voucher = await SequelizeVoucher.findOne({ 
                 where: { 
                     vou_transactionnumber: vou_transactionnumber ?? null
-                } 
+                },
+                transaction: options?.transaction
             });
             return voucher;
         } catch (error: any) {
