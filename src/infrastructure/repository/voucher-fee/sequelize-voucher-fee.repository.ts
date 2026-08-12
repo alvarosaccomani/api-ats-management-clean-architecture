@@ -6,7 +6,7 @@ import { Op } from "sequelize";
 import { SequelizeVoucherFeeStatus } from '../../model/voucher-fee-status/voucher-fee-status.model';
 
 export class SequelizeVoucherFeeRepository implements VoucherFeeRepository {
-    async getVoucherFees(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string): Promise<VoucherFeeEntity[] | null> {
+    async getVoucherFees(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, options?: { transaction?: any }): Promise<VoucherFeeEntity[] | null> {
         try {
             const voucherFees = await SequelizeVoucherFee.findAll({
                 where: {
@@ -23,7 +23,8 @@ export class SequelizeVoucherFeeRepository implements VoucherFeeRepository {
                 ],
                 order: [
                     [Sequelize.col('vouf_quotanumber'), 'ASC']
-                ]
+                ],
+                transaction: options?.transaction
             });
             if(!voucherFees) {
                 throw new Error(`No hay cuotas de comprobante`)
@@ -35,7 +36,7 @@ export class SequelizeVoucherFeeRepository implements VoucherFeeRepository {
         }
     }
 
-    async findVoucherFeeById(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, vouf_uuid: string): Promise<VoucherFeeEntity | null> {
+    async findVoucherFeeById(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, vouf_uuid: string, options?: { transaction?: any }): Promise<VoucherFeeEntity | null> {
         try {
             const voucherFee = await SequelizeVoucherFee.findOne({ 
                 where: { 
@@ -44,7 +45,8 @@ export class SequelizeVoucherFeeRepository implements VoucherFeeRepository {
                     per_uuid: per_uuid ?? null,
                     vou_uuid: vou_uuid ?? null,
                     vouf_uuid: vouf_uuid ?? null
-                } 
+                },
+                transaction: options?.transaction
             });
             if(!voucherFee) {
                 throw new Error(`No hay cuota de comprobante con el Id: ${vouf_uuid}`);
@@ -56,10 +58,13 @@ export class SequelizeVoucherFeeRepository implements VoucherFeeRepository {
         }
     }
 
-    async createVoucherFee(voucherFee: VoucherFeeEntity): Promise<VoucherFeeEntity | null> {
+    async createVoucherFee(voucherFee: VoucherFeeEntity, options?: { transaction?: any }): Promise<VoucherFeeEntity | null> {
         try {
             let { usr_uuid, crd_uuid, per_uuid, vou_uuid, vouf_uuid, vouf_quotanumber, vouf_quotaamount, vouf_quotaduedate, voufs_uuid, vouf_createdat, vouf_updatedat } = voucherFee
-            const result = await SequelizeVoucherFee.create({ usr_uuid, crd_uuid, per_uuid, vou_uuid, vouf_uuid, vouf_quotanumber, vouf_quotaamount, vouf_quotaduedate, voufs_uuid, vouf_createdat, vouf_updatedat });
+            const result = await SequelizeVoucherFee.create(
+                { usr_uuid, crd_uuid, per_uuid, vou_uuid, vouf_uuid, vouf_quotanumber, vouf_quotaamount, vouf_quotaduedate, voufs_uuid, vouf_createdat, vouf_updatedat },
+                { transaction: options?.transaction }
+            );
             if(!result) {
                 throw new Error(`No se ha agregado la cuota de comprobante`);
             }
@@ -71,7 +76,7 @@ export class SequelizeVoucherFeeRepository implements VoucherFeeRepository {
         }
     }
 
-    async updateVoucherFee(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, vouf_uuid: string, voucherFee: VoucherFeeUpdateData): Promise<VoucherFeeEntity | null> {
+    async updateVoucherFee(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, vouf_uuid: string, voucherFee: VoucherFeeUpdateData, options?: { transaction?: any }): Promise<VoucherFeeEntity | null> {
         try {
             const [updatedCount, [updatedVoucherFee]] = await SequelizeVoucherFee.update(
                 {
@@ -83,6 +88,7 @@ export class SequelizeVoucherFeeRepository implements VoucherFeeRepository {
                 {
                     where: { usr_uuid, crd_uuid, per_uuid, vou_uuid, vouf_uuid },
                     returning: true,
+                    transaction: options?.transaction
                 }
             );
             if (updatedCount === 0) {
@@ -95,10 +101,13 @@ export class SequelizeVoucherFeeRepository implements VoucherFeeRepository {
         }
     }
 
-    async deleteVoucherFee(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, vouf_uuid: string): Promise<VoucherFeeEntity | null> {
+    async deleteVoucherFee(usr_uuid: string, crd_uuid: string, per_uuid: string, vou_uuid: string, vouf_uuid: string, options?: { transaction?: any }): Promise<VoucherFeeEntity | null> {
         try {
-            const voucherFee = await this.findVoucherFeeById(usr_uuid, crd_uuid, per_uuid, vou_uuid, vouf_uuid);
-            const result = await SequelizeVoucherFee.destroy({ where: { usr_uuid, crd_uuid, per_uuid, vou_uuid, vouf_uuid } });
+            const voucherFee = await this.findVoucherFeeById(usr_uuid, crd_uuid, per_uuid, vou_uuid, vouf_uuid, options);
+            const result = await SequelizeVoucherFee.destroy({ 
+                where: { usr_uuid, crd_uuid, per_uuid, vou_uuid, vouf_uuid },
+                transaction: options?.transaction
+            });
             if(!result) {
                 throw new Error(`No se ha eliminado la cuota de comprobante`);
             };
