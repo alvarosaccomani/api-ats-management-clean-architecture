@@ -37,7 +37,7 @@ export class ScopeValue implements ScopeEntity {
         scp_createdat?: Date;
         scp_updatedat?: Date;
     }) {
-        this.scp_uuid = scp_uuid ?? uuid();
+        this.scp_uuid = (scp_uuid && String(scp_uuid).trim() !== '') ? scp_uuid : uuid();
         this.scp_name = scp_name;
         this.scp_description = scp_description ?? null;
         this.scp_isshared = scp_isshared ?? false;
