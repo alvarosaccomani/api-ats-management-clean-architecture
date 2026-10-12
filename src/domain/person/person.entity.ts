@@ -7,6 +7,7 @@ export interface PersonEntity {
     prs_phone?: string | null;
     prs_email?: string | null;
     prs_taxid?: string | null;
+    prs_commissionrate?: number | null;
     prs_active: boolean;
     prs_createdat: Date;
     prs_updatedat: Date;
@@ -20,5 +21,6 @@ export type PersonUpdateData = Pick<PersonEntity,
     'prs_phone' |
     'prs_email' |
     'prs_taxid' |
+    'prs_commissionrate' |
     'prs_active'
 >;

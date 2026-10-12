@@ -35,7 +35,9 @@ export class PersonController {
             const person = await this.personUseCase.createPerson(req.body);
             res.status(201).send({ success: true, data: person });
         } catch (error: any) {
-            res.status(500).send({ success: false, error: error.message });
+            console.error('Error en insertCtrl:', error);
+            const detailedError = error.errors?.map((e: any) => e.message).join(', ') || error.original?.detail || error.original?.message || error.message;
+            res.status(500).send({ success: false, error: detailedError });
         }
     }
 
@@ -45,7 +47,9 @@ export class PersonController {
             const person = await this.personUseCase.updatePerson(prs_uuid, req.body);
             res.status(200).send({ success: true, data: person });
         } catch (error: any) {
-            res.status(500).send({ success: false, error: error.message });
+            console.error('Error en updateCtrl:', error);
+            const detailedError = error.errors?.map((e: any) => e.message).join(', ') || error.original?.detail || error.original?.message || error.message;
+            res.status(500).send({ success: false, error: detailedError });
         }
     }
 

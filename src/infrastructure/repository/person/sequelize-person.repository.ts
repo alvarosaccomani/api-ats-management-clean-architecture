@@ -42,7 +42,7 @@ export class SequelizePersonRepository implements PersonRepository {
 
     async createPerson(person: PersonEntity): Promise<PersonEntity | null> {
         try {
-            const { prs_uuid, scp_uuid, usr_uuidlinked, prs_name, prs_type, prs_phone, prs_email, prs_taxid, prs_active, prs_createdat, prs_updatedat } = person;
+            const { prs_uuid, scp_uuid, usr_uuidlinked, prs_name, prs_type, prs_phone, prs_email, prs_taxid, prs_commissionrate, prs_active, prs_createdat, prs_updatedat } = person;
             const result = await SequelizePerson.create({
                 prs_uuid,
                 scp_uuid,
@@ -52,6 +52,7 @@ export class SequelizePersonRepository implements PersonRepository {
                 prs_phone,
                 prs_email,
                 prs_taxid,
+                prs_commissionrate,
                 prs_active: prs_active ?? true,
                 prs_createdat,
                 prs_updatedat
@@ -72,12 +73,13 @@ export class SequelizePersonRepository implements PersonRepository {
             const [updatedCount, [updatedPerson]] = await SequelizePerson.update(
                 {
                     scp_uuid: person.scp_uuid,
-                    usr_uuidlinked: person.usr_uuidlinked,
-                    prs_name: person.prs_name,
-                    prs_type: person.prs_type,
-                    prs_phone: person.prs_phone,
-                    prs_email: person.prs_email,
-                    prs_taxid: person.prs_taxid,
+                    usr_uuidlinked: person.usr_uuidlinked && String(person.usr_uuidlinked).trim() !== '' ? person.usr_uuidlinked : null,
+                    prs_name: person.prs_name ? person.prs_name.trim() : '',
+                    prs_type: person.prs_type && person.prs_type.trim() !== '' ? person.prs_type : 'OTRO',
+                    prs_phone: person.prs_phone && person.prs_phone.trim() !== '' ? person.prs_phone : null,
+                    prs_email: person.prs_email && person.prs_email.trim() !== '' ? person.prs_email : null,
+                    prs_taxid: person.prs_taxid && person.prs_taxid.trim() !== '' ? person.prs_taxid : null,
+                    prs_commissionrate: person.prs_commissionrate != null && (person.prs_commissionrate as any) !== '' ? Number(person.prs_commissionrate) : null,
                     prs_active: person.prs_active
                 },
                 {

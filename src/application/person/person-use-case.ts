@@ -72,6 +72,7 @@ export class PersonUseCase {
         prs_phone,
         prs_email,
         prs_taxid,
+        prs_commissionrate,
         prs_active
     }: {
         prs_uuid?: string;
@@ -82,6 +83,7 @@ export class PersonUseCase {
         prs_phone?: string | null;
         prs_email?: string | null;
         prs_taxid?: string | null;
+        prs_commissionrate?: number | null;
         prs_active?: boolean;
     }) {
         try {
@@ -98,6 +100,7 @@ export class PersonUseCase {
                 prs_phone,
                 prs_email,
                 prs_taxid,
+                prs_commissionrate,
                 prs_active
             });
             const personCreated = await this.personRepository.createPerson(personValue);
@@ -113,6 +116,7 @@ export class PersonUseCase {
                 prs_phone: personCreated.prs_phone,
                 prs_email: personCreated.prs_email,
                 prs_taxid: personCreated.prs_taxid,
+                prs_commissionrate: personCreated.prs_commissionrate,
                 prs_active: personCreated.prs_active,
                 prs_createdat: TimezoneConverter.toIsoStringInTimezone(personCreated.prs_createdat, 'America/Buenos_Aires'),
                 prs_updatedat: TimezoneConverter.toIsoStringInTimezone(personCreated.prs_updatedat, 'America/Buenos_Aires'),
@@ -131,6 +135,7 @@ export class PersonUseCase {
         prs_phone,
         prs_email,
         prs_taxid,
+        prs_commissionrate,
         prs_active
     }: {
         scp_uuid: string;
@@ -140,6 +145,7 @@ export class PersonUseCase {
         prs_phone?: string | null;
         prs_email?: string | null;
         prs_taxid?: string | null;
+        prs_commissionrate?: number | null;
         prs_active: boolean;
     }) {
         try {
@@ -155,6 +161,7 @@ export class PersonUseCase {
                 prs_phone,
                 prs_email,
                 prs_taxid,
+                prs_commissionrate,
                 prs_active
             });
             if (!personUpdated) {
@@ -169,6 +176,7 @@ export class PersonUseCase {
                 prs_phone: personUpdated.prs_phone,
                 prs_email: personUpdated.prs_email,
                 prs_taxid: personUpdated.prs_taxid,
+                prs_commissionrate: personUpdated.prs_commissionrate,
                 prs_active: personUpdated.prs_active,
                 prs_createdat: TimezoneConverter.toIsoStringInTimezone(personUpdated.prs_createdat, 'America/Buenos_Aires'),
                 prs_updatedat: TimezoneConverter.toIsoStringInTimezone(personUpdated.prs_updatedat, 'America/Buenos_Aires'),

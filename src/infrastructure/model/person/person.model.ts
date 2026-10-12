@@ -12,6 +12,7 @@ export class SequelizePerson extends Model<PersonEntity, Omit<PersonEntity, 'id'
   declare prs_phone?: string | null;
   declare prs_email?: string | null;
   declare prs_taxid?: string | null;
+  declare prs_commissionrate?: number | null;
   declare prs_active: boolean;
   declare prs_createdat: Date;
   declare prs_updatedat: Date;
@@ -36,7 +37,7 @@ SequelizePerson.init({
     allowNull: false
   },
   prs_type: {
-    type: DataTypes.STRING(30),
+    type: DataTypes.STRING(150),
     allowNull: false,
     defaultValue: 'OTRO'
   },
@@ -50,6 +51,10 @@ SequelizePerson.init({
   },
   prs_taxid: {
     type: DataTypes.STRING(30),
+    allowNull: true
+  },
+  prs_commissionrate: {
+    type: DataTypes.FLOAT,
     allowNull: true
   },
   prs_active: {
