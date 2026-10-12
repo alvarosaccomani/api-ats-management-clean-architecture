@@ -49,17 +49,17 @@ export class TransactionValue implements TransactionEntity {
         trx_createdat?: Date;
         trx_updatedat?: Date;
     }) {
-        this.trx_uuid = trx_uuid ?? uuid();
+        this.trx_uuid = (trx_uuid && String(trx_uuid).trim() !== '') ? trx_uuid : uuid();
         this.scp_uuid = scp_uuid;
         this.usr_uuidcreator = usr_uuidcreator;
         this.trx_type = trx_type;
         this.trx_datetime = trx_datetime ?? moment().toDate();
         this.trx_amount = trx_amount;
         this.trx_currency = trx_currency ?? 'ARS';
-        this.crd_uuid = crd_uuid ?? null;
-        this.target_crduuid = target_crduuid ?? null;
+        this.crd_uuid = crd_uuid && String(crd_uuid).trim() !== '' ? crd_uuid : null;
+        this.target_crduuid = target_crduuid && String(target_crduuid).trim() !== '' ? target_crduuid : null;
         this.trx_concept = trx_concept;
-        this.prs_uuid = prs_uuid ?? null;
+        this.prs_uuid = prs_uuid && String(prs_uuid).trim() !== '' ? prs_uuid : null;
         this.trx_notes = trx_notes ?? null;
         this.trx_createdat = trx_createdat ?? moment().toDate();
         this.trx_updatedat = trx_updatedat ?? moment().toDate();

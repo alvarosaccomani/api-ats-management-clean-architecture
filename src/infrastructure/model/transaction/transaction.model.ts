@@ -16,6 +16,8 @@ export class SequelizeTransaction extends Model<TransactionEntity, Omit<Transact
   declare target_crduuid?: string | null;
   declare trx_concept: string;
   declare prs_uuid?: string | null;
+  declare trx_commissionrate?: number | null;
+  declare trx_commissionamount?: number | null;
   declare trx_notes?: string | null;
   declare trx_createdat: Date;
   declare trx_updatedat: Date;
@@ -68,6 +70,14 @@ SequelizeTransaction.init({
   },
   prs_uuid: {
     type: DataTypes.STRING(40),
+    allowNull: true
+  },
+  trx_commissionrate: {
+    type: DataTypes.FLOAT,
+    allowNull: true
+  },
+  trx_commissionamount: {
+    type: DataTypes.FLOAT,
     allowNull: true
   },
   trx_notes: {

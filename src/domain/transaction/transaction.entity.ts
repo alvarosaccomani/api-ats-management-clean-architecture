@@ -15,6 +15,8 @@ export interface TransactionEntity {
     trx_concept: string;
     prs_uuid?: string | null;
     prs?: PersonEntity;
+    trx_commissionrate?: number | null;
+    trx_commissionamount?: number | null;
     trx_notes?: string | null;
     trx_createdat: Date;
     trx_updatedat: Date;
@@ -30,5 +32,7 @@ export type TransactionUpdateData = Pick<TransactionEntity,
     'target_crduuid' |
     'trx_concept' |
     'prs_uuid' |
+    'trx_commissionrate' |
+    'trx_commissionamount' |
     'trx_notes'
 >;
