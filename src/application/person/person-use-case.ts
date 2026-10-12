@@ -28,6 +28,7 @@ export class PersonUseCase {
                 prs_phone: person.prs_phone,
                 prs_email: person.prs_email,
                 prs_taxid: person.prs_taxid,
+                prs_commissionrate: person.prs_commissionrate,
                 prs_active: person.prs_active,
                 prs_createdat: TimezoneConverter.toIsoStringInTimezone(person.prs_createdat, 'America/Buenos_Aires'),
                 prs_updatedat: TimezoneConverter.toIsoStringInTimezone(person.prs_updatedat, 'America/Buenos_Aires'),
