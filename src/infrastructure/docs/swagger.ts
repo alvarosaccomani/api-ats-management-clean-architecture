@@ -241,6 +241,137 @@ const swaggerOptions: OAS3Options = {
             scpu_role: { type: 'string', example: 'ADMIN' },
           },
         },
+        BankEntity: {
+          type: 'object',
+          properties: {
+            usr_uuid: { type: 'string', format: 'uuid', example: 'b75f85b8-5cf6-4b2a-8742-ec32e35b7194' },
+            ban_uuid: { type: 'string', format: 'uuid', example: '660e8400-e29b-41d4-a716-446655440001' },
+            ban_name: { type: 'string', example: 'Banco Santander' },
+            ban_description: { type: 'string', example: 'Cuenta corriente operativa' },
+            ban_createdat: { type: 'string', format: 'date-time' },
+            ban_updatedat: { type: 'string', format: 'date-time' },
+          },
+        },
+        BankInputDTO: {
+          type: 'object',
+          required: ['usr_uuid', 'ban_name'],
+          properties: {
+            usr_uuid: { type: 'string', format: 'uuid', example: 'b75f85b8-5cf6-4b2a-8742-ec32e35b7194' },
+            ban_name: { type: 'string', example: 'Banco Galicia' },
+            ban_description: { type: 'string', example: 'Caja de ahorro principal' },
+          },
+        },
+        BankUpdateDTO: {
+          type: 'object',
+          properties: {
+            ban_name: { type: 'string', example: 'Banco Galicia Actualizado' },
+            ban_description: { type: 'string', example: 'Descripción actualizada' },
+          },
+        },
+        BrandCardEntity: {
+          type: 'object',
+          properties: {
+            brcrd_uuid: { type: 'string', format: 'uuid', example: '770e8400-e29b-41d4-a716-446655440001' },
+            brcrd_name: { type: 'string', example: 'VISA' },
+            brcrd_description: { type: 'string', example: 'Red internacional Visa' },
+            brcrd_createdat: { type: 'string', format: 'date-time' },
+            brcrd_updatedat: { type: 'string', format: 'date-time' },
+          },
+        },
+        BrandCardInputDTO: {
+          type: 'object',
+          required: ['brcrd_name'],
+          properties: {
+            brcrd_name: { type: 'string', example: 'Mastercard' },
+            brcrd_description: { type: 'string', example: 'Red Mastercard' },
+          },
+        },
+        TypeCardEntity: {
+          type: 'object',
+          properties: {
+            tycrd_uuid: { type: 'string', format: 'uuid', example: '880e8400-e29b-41d4-a716-446655440001' },
+            tycrd_name: { type: 'string', example: 'Crédito' },
+            tycrd_description: { type: 'string', example: 'Tarjeta de crédito corporativa o personal' },
+            tycrd_createdat: { type: 'string', format: 'date-time' },
+            tycrd_updatedat: { type: 'string', format: 'date-time' },
+          },
+        },
+        TypeCardInputDTO: {
+          type: 'object',
+          required: ['tycrd_name'],
+          properties: {
+            tycrd_name: { type: 'string', example: 'Débito' },
+            tycrd_description: { type: 'string', example: 'Tarjeta de débito en cuenta bancaria' },
+          },
+        },
+        CardEntity: {
+          type: 'object',
+          properties: {
+            usr_uuid: { type: 'string', format: 'uuid', example: 'b75f85b8-5cf6-4b2a-8742-ec32e35b7194' },
+            crd_uuid: { type: 'string', format: 'uuid', example: '990e8400-e29b-41d4-a716-446655440001' },
+            scp_uuid: { type: 'string', format: 'uuid', nullable: true, example: null },
+            crd_alias: { type: 'string', nullable: true, example: 'Visa Santander Corporativa' },
+            crd_cardholdername: { type: 'string', nullable: true, example: 'Juan Perez' },
+            crd_maskedcardnumber: { type: 'string', example: '4509********1234' },
+            crd_last4digits: { type: 'string', example: '1234' },
+            tycrd_uuid: { type: 'string', format: 'uuid', example: '880e8400-e29b-41d4-a716-446655440001' },
+            brcrd_uuid: { type: 'string', format: 'uuid', example: '770e8400-e29b-41d4-a716-446655440001' },
+            ban_uuid: { type: 'string', format: 'uuid', example: '660e8400-e29b-41d4-a716-446655440001' },
+            crd_expirationdate: { type: 'string', format: 'date-time', example: '2028-12-31T00:00:00.000Z' },
+            crd_creditlimit: { type: 'number', nullable: true, example: 500000 },
+            crd_active: { type: 'boolean', example: true },
+            crd_allowdelegation: { type: 'boolean', example: false },
+            crd_createdat: { type: 'string', format: 'date-time' },
+            crd_updatedat: { type: 'string', format: 'date-time' },
+          },
+        },
+        CardInputDTO: {
+          type: 'object',
+          required: ['usr_uuid', 'crd_maskedcardnumber', 'crd_last4digits', 'tycrd_uuid', 'brcrd_uuid', 'ban_uuid', 'crd_expirationdate'],
+          properties: {
+            usr_uuid: { type: 'string', format: 'uuid', example: 'b75f85b8-5cf6-4b2a-8742-ec32e35b7194' },
+            crd_maskedcardnumber: { type: 'string', example: '4509********1234' },
+            crd_last4digits: { type: 'string', example: '1234' },
+            tycrd_uuid: { type: 'string', format: 'uuid', example: '880e8400-e29b-41d4-a716-446655440001' },
+            brcrd_uuid: { type: 'string', format: 'uuid', example: '770e8400-e29b-41d4-a716-446655440001' },
+            ban_uuid: { type: 'string', format: 'uuid', example: '660e8400-e29b-41d4-a716-446655440001' },
+            crd_expirationdate: { type: 'string', format: 'date-time', example: '2028-12-31T00:00:00.000Z' },
+            crd_creditlimit: { type: 'number', example: 500000 },
+            crd_active: { type: 'boolean', example: true },
+            scp_uuid: { type: 'string', format: 'uuid', example: '550e8400-e29b-41d4-a716-446655440001' },
+            crd_alias: { type: 'string', example: 'Visa Santander' },
+            crd_cardholdername: { type: 'string', example: 'Juan Perez' },
+            crd_allowdelegation: { type: 'boolean', example: false },
+          },
+        },
+        CardUpdateDTO: {
+          type: 'object',
+          properties: {
+            crd_alias: { type: 'string', example: 'Visa Santander Personal' },
+            crd_cardholdername: { type: 'string', example: 'Juan Perez' },
+            crd_creditlimit: { type: 'number', example: 750000 },
+            crd_active: { type: 'boolean', example: true },
+            crd_allowdelegation: { type: 'boolean', example: true },
+          },
+        },
+        PaymentMethodEntity: {
+          type: 'object',
+          properties: {
+            paym_uuid: { type: 'string', format: 'uuid', example: 'aa0e8400-e29b-41d4-a716-446655440001' },
+            paym_name: { type: 'string', example: 'Transferencia Bancaria' },
+            paym_description: { type: 'string', example: 'Pago por transferencia directa CBU/CVU' },
+            paym_createdat: { type: 'string', format: 'date-time' },
+            paym_updatedat: { type: 'string', format: 'date-time' },
+          },
+        },
+        PaymentMethodInputDTO: {
+          type: 'object',
+          required: ['paym_name'],
+          properties: {
+            paym_name: { type: 'string', example: 'Mercado Pago' },
+            paym_description: { type: 'string', example: 'Cobro a través de QR de Mercado Pago' },
+          },
+        },
         StandardResponse: {
           type: 'object',
           properties: {
