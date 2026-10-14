@@ -29,6 +29,8 @@
     "reflect-metadata": "^0.2.2",
     "sequelize": "^6.37.7",
     "socket.io": "^4.7.5",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
