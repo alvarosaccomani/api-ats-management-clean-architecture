@@ -5,6 +5,7 @@ import { createServer } from 'http';
 import initSocket from "./infrastructure/sockets/socketInit";
 import configureSocketsEvents from "./infrastructure/sockets";
 import configureExpressRoutes from "./infrastructure/router";
+import configureSwagger from "./infrastructure/docs/swagger";
 
 
 class Server {
@@ -19,6 +20,7 @@ class Server {
         this.socketAdapter = initSocket(this.httpServer);
         this.config();
         this.socketConfig();
+        this.swaggerConfig();
         this.routerConfig();
     }
 
@@ -30,6 +32,10 @@ class Server {
 
     private socketConfig() {
         configureSocketsEvents(this.socketAdapter);
+    }
+
+    private swaggerConfig() {
+        configureSwagger(this.app);
     }
 
     private routerConfig() {
