@@ -25,13 +25,17 @@ function configureUserRoutes(app: Express, socketAdapter: SocketAdapter) {
     
     /**
      * @swagger
-     * /api/user:
+     * /users:
      *   get:
-     *     summary: Obtiene la lista de usuarios registrados.
+     *     tags:
+     *       - Users
+     *     summary: Obtiene la lista de usuarios registrados
      *     description: Retorna una lista de todos los usuarios registrados en el sistema.
+     *     security:
+     *       - bearerAuth: []
      *     responses:
      *       200:
-     *         description: Operación exitosa. Retorna un objeto con los datos de los usuarios.
+     *         description: Operación exitosa. Retorna la lista de usuarios.
      *         content:
      *           application/json:
      *             schema:
@@ -39,19 +43,70 @@ function configureUserRoutes(app: Express, socketAdapter: SocketAdapter) {
      *               properties:
      *                 success:
      *                   type: boolean
-     *                   description: Indica si la operación fue exitosa.
      *                   example: true
      *                 message:
      *                   type: string
-     *                   description: Mensaje descriptivo de la operación.
      *                   example: Usuarios retornados.
      *                 data:
      *                   type: array
-     *                   description: Lista de usuarios registrados.
      *                   items:
      *                     $ref: '#/components/schemas/UserEntity'
+     *       401:
+     *         description: No autorizado. Token faltante o inválido.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
      */
     app.get(`/${process.env.BASE_URL_API}/users/:filter?/:page?/:perPage?`, userCtrl.getAllCtrl);
+
+    /**
+     * @swagger
+     * /user/{usr_uuid}:
+     *   get:
+     *     tags:
+     *       - Users
+     *     summary: Obtiene el detalle de un usuario por UUID
+     *     description: Retorna la información detallada del usuario correspondiente al UUID provisto.
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: usr_uuid
+     *         required: true
+     *         schema:
+     *           type: string
+     *           format: uuid
+     *         description: UUID del usuario a consultar
+     *     responses:
+     *       200:
+     *         description: Usuario encontrado.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success:
+     *                   type: boolean
+     *                   example: true
+     *                 message:
+     *                   type: string
+     *                   example: Usuario encontrado.
+     *                 data:
+     *                   $ref: '#/components/schemas/UserEntity'
+     *       401:
+     *         description: No autorizado.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     *       404:
+     *         description: Usuario no encontrado.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     */
     app.get(`/${process.env.BASE_URL_API}/user/:usr_uuid`, userCtrl.getCtrl);
     app.post(`/${process.env.BASE_URL_API}/user`, userCtrl.insertCtrl);
     app.put(`/${process.env.BASE_URL_API}/user/:usr_uuid`, userCtrl.updateCtrl);
