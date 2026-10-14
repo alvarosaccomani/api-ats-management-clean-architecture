@@ -44,9 +44,121 @@ function configureAuthRoutes(app: Express, socketAdapter: SocketAdapter) {
      *               $ref: '#/components/schemas/ErrorResponse'
      */
     app.post(`/${process.env.BASE_URL_API}/login`, authCtrl.loginCtrl);
+
+    /**
+     * @swagger
+     * /register:
+     *   post:
+     *     tags:
+     *       - Auth
+     *     summary: Registrar un nuevo usuario
+     *     description: Registra un nuevo usuario tanto en el Kernel Central como localmente.
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/RegisterDTO'
+     *     responses:
+     *       200:
+     *         description: Usuario registrado con éxito.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/StandardResponse'
+     *       400:
+     *         description: Error en la validación o registro de usuario.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     */
     app.post(`/${process.env.BASE_URL_API}/register`, authCtrl.saveCtrl);
+
+    /**
+     * @swagger
+     * /confirm-account:
+     *   post:
+     *     tags:
+     *       - Auth
+     *     summary: Confirmar cuenta de usuario
+     *     description: Activa la cuenta mediante el token de confirmación enviado por correo.
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/ConfirmAccountDTO'
+     *     responses:
+     *       200:
+     *         description: Cuenta confirmada con éxito.
+     *       400:
+     *         description: Token inválido o expirado.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     */
     app.post(`/${process.env.BASE_URL_API}/confirm-account`, authCtrl.confirmCtrl);
+
+    /**
+     * @swagger
+     * /forgot-password:
+     *   post:
+     *     tags:
+     *       - Auth
+     *     summary: Solicitar recuperación de contraseña
+     *     description: Genera y envía un token de recuperación al correo provisto.
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/ForgotPasswordDTO'
+     *     responses:
+     *       200:
+     *         description: Correo de recuperación enviado.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/StandardResponse'
+     *       400:
+     *         description: Correo no encontrado o inválido.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     */
     app.post(`/${process.env.BASE_URL_API}/forgot-password`, authCtrl.forgotCtrl);
+
+    /**
+     * @swagger
+     * /reset-password:
+     *   post:
+     *     tags:
+     *       - Auth
+     *     summary: Restablecer contraseña
+     *     description: Actualiza la contraseña utilizando el token de reseteo recibido.
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/ResetPasswordDTO'
+     *     responses:
+     *       200:
+     *         description: Contraseña restablecida con éxito.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/StandardResponse'
+     *       400:
+     *         description: Token inválido o datos incompletos.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     */
     app.post(`/${process.env.BASE_URL_API}/reset-password`, authCtrl.resetCtrl);
     
     /**
@@ -86,7 +198,53 @@ function configureAuthRoutes(app: Express, socketAdapter: SocketAdapter) {
      *               $ref: '#/components/schemas/ErrorResponse'
      */
     app.post(`/${process.env.BASE_URL_API}/auth/sso/verify`, authCtrl.verifySSOTokenCtrl);
+
+    /**
+     * @swagger
+     * /auth/sso/config:
+     *   get:
+     *     tags:
+     *       - Auth
+     *     summary: Obtener configuración de login SSO
+     *     description: Retorna el modo de inicio de sesión configurado para la aplicación (local o central).
+     *     responses:
+     *       200:
+     *         description: Configuración obtenida correctamente.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success:
+     *                   type: boolean
+     *                   example: true
+     *                 app_login_mode:
+     *                   type: string
+     *                   example: central
+     *                 central_login_url:
+     *                   type: string
+     *                   example: http://localhost:3006/auth/login?redirect=...
+     */
     app.get(`/${process.env.BASE_URL_API}/auth/sso/config`, authCtrl.getAppConfigCtrl);
+
+    /**
+     * @swagger
+     * /auth/sso/log-auth:
+     *   post:
+     *     tags:
+     *       - Auth
+     *     summary: Registrar log de auditoría de autenticación
+     *     description: Reenvía un log de auditoría de autenticación al servicio central.
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *     responses:
+     *       200:
+     *         description: Auditoría registrada correctamente.
+     */
     app.post(`/${process.env.BASE_URL_API}/auth/sso/log-auth`, authCtrl.logAuthCtrl);
 }
 
