@@ -11,7 +11,8 @@ export class TreeController {
     public async getCardsTreeCtrl(req: Request, res: Response) {
         try {
             const usr_uuid = req.params.usr_uuid;
-            const cardsTree = await this.treeUseCase.getCardsTree(usr_uuid);
+            const scp_uuid = req.query.scp_uuid as string | undefined;
+            const cardsTree = await this.treeUseCase.getCardsTree(usr_uuid, scp_uuid);
             return res.status(200).send({
                 success: true,
                 message: 'Arbol de tarjetas retornado.',

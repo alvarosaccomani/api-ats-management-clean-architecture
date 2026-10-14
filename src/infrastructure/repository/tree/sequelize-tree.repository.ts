@@ -9,12 +9,17 @@ import { SequelizeBank } from '../../model/bank/bank.model';
 import { SequelizePeriod } from '../../model/period/period.model';
 
 export class SequelizeTreeRepository implements TreeRepository {
-    async getCardsTree(usr_uuid: string): Promise<TreeEntity[] | null> {
+    async getCardsTree(usr_uuid: string, scp_uuid?: string): Promise<TreeEntity[] | null> {
         try {
+            const whereCondition: any = {
+                usr_uuid: usr_uuid ?? null
+            };
+            if (scp_uuid && scp_uuid !== 'ALL') {
+                whereCondition.scp_uuid = scp_uuid;
+            }
+
             const cards = await SequelizeCard.findAll({
-                where: {
-                    usr_uuid: usr_uuid ?? null
-                },
+                where: whereCondition,
                 include: [
                     {
                         model: SequelizeTypeCard,

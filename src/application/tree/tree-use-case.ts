@@ -7,9 +7,9 @@ export class TreeUseCase {
         this.getCardsTree = this.getCardsTree.bind(this);
     }
 
-    public async getCardsTree(usr_uuid: string) {
+    public async getCardsTree(usr_uuid: string, scp_uuid?: string) {
         try {
-            const cardsTree = await this.treeRepository.getCardsTree(usr_uuid);
+            const cardsTree = await this.treeRepository.getCardsTree(usr_uuid, scp_uuid);
             if(!cardsTree) {
                 throw new Error('No hay tarjetas.');
             }

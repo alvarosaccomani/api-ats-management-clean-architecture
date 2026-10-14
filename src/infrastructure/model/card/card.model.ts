@@ -8,10 +8,15 @@ import { SequelizePeriod } from '../period/period.model';
 import { BrandCardEntity } from '../../../domain/brand-card/brand-card.entity';
 import { TypeCardEntity } from '../../../domain/type-card/type-card.entity';
 import { BankEntity } from '../../../domain/bank/bank.entity';
+import { SequelizeScope } from '../scope/scope.model';
 
 export class SequelizeCard extends Model<CardEntity, Omit<CardEntity, 'id'>> {
   declare usr_uuid: string;
   declare crd_uuid: string;
+  declare scp_uuid?: string | null;
+  declare scp?: SequelizeScope;
+  declare crd_alias?: string | null;
+  declare crd_cardholdername?: string | null;
   declare crd_maskedcardnumber: string;
   declare crd_last4digits: string;
   declare tycrd_uuid: string;
@@ -23,6 +28,7 @@ export class SequelizeCard extends Model<CardEntity, Omit<CardEntity, 'id'>> {
   declare crd_expirationdate: Date;
   declare crd_creditlimit: number | null;
   declare crd_active: boolean;
+  declare crd_allowdelegation: boolean;
   declare crd_createdat: Date;
   declare crd_updatedat: Date;
   declare periods?: SequelizePeriod[];
@@ -38,6 +44,18 @@ SequelizeCard.init({
     type: DataTypes.STRING, 
     primaryKey: true,
     allowNull: false
+  },
+  scp_uuid: {
+    type: DataTypes.STRING(40),
+    allowNull: true
+  },
+  crd_alias: {
+    type: DataTypes.STRING(100),
+    allowNull: true
+  },
+  crd_cardholdername: {
+    type: DataTypes.STRING(150),
+    allowNull: true
   },
   crd_maskedcardnumber: {
     type: DataTypes.STRING(19),
@@ -71,6 +89,11 @@ SequelizeCard.init({
     type: DataTypes.BOOLEAN,
     allowNull: true,
     defaultValue: true
+  },
+  crd_allowdelegation: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false
   },
   crd_createdat: {
     type: DataTypes.DATE,
@@ -123,4 +146,11 @@ SequelizeCard.hasMany(SequelizePeriod, {
   foreignKey: 'crd_uuid',
   sourceKey: 'crd_uuid',
   as: 'periods'
+});
+
+// Sequelize Scope Foreign Key
+SequelizeCard.belongsTo(SequelizeScope, {
+  foreignKey: 'scp_uuid',
+  targetKey: 'scp_uuid',
+  as: 'scp'
 });

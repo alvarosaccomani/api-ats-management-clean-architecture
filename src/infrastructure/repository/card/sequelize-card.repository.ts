@@ -6,14 +6,20 @@ import { Op } from "sequelize";
 import { SequelizeTypeCard } from '../../model/type-card/type-card.model';
 import { SequelizeBrandCard } from '../../model/brand-card/brand-card.model';
 import { SequelizeBank } from '../../model/bank/bank.model';
+import { SequelizeScope } from '../../model/scope/scope.model';
 
 export class SequelizeCardRepository implements CardRepository {
-    async getCards(usr_uuid: string): Promise<CardEntity[] | null> {
+    async getCards(usr_uuid: string, scp_uuid?: string): Promise<CardEntity[] | null> {
         try {
+            const whereCondition: any = {
+                usr_uuid: usr_uuid ?? null
+            };
+            if (scp_uuid && scp_uuid !== 'ALL') {
+                whereCondition.scp_uuid = scp_uuid;
+            }
+
             const cards = await SequelizeCard.findAll({
-                where: {
-                    usr_uuid: usr_uuid ?? null
-                },
+                where: whereCondition,
                 include: [
                     {
                         model: SequelizeTypeCard,
@@ -26,6 +32,10 @@ export class SequelizeCardRepository implements CardRepository {
                     {
                         model: SequelizeBank,
                         as: 'ban'
+                    },
+                    {
+                        model: SequelizeScope,
+                        as: 'scp'
                     }
                 ],
                 order: [
@@ -34,8 +44,8 @@ export class SequelizeCardRepository implements CardRepository {
             });
             if(!cards) {
                 throw new Error(`No hay tarjetas`)
-            };
-            return cards;
+            }
+            return cards.map(c => c.get({ plain: true }) as CardEntity);
         } catch (error: any) {
             console.error('Error en getCards:', error.message);
             throw error;
@@ -48,12 +58,18 @@ export class SequelizeCardRepository implements CardRepository {
                 where: { 
                     usr_uuid: usr_uuid ?? null,
                     crd_uuid: crd_uuid ?? null
-                } 
+                },
+                include: [
+                    {
+                        model: SequelizeScope,
+                        as: 'scp'
+                    }
+                ]
             });
             if(!card) {
                 throw new Error(`No hay tarjeta con el Id: ${crd_uuid}`);
-            };
-            return card.dataValues;
+            }
+            return card.get({ plain: true }) as CardEntity;
         } catch (error: any) {
             console.error('Error en findCardById:', error.message);
             throw error;
@@ -62,13 +78,48 @@ export class SequelizeCardRepository implements CardRepository {
 
     async createCard(card: CardEntity): Promise<CardEntity | null> {
         try {
-            let { usr_uuid, crd_uuid, crd_maskedcardnumber, crd_last4digits, tycrd_uuid, brcrd_uuid, ban_uuid, crd_expirationdate, crd_creditlimit, crd_active, crd_createdat, crd_updatedat } = card
-            const result = await SequelizeCard.create({ usr_uuid, crd_uuid, crd_maskedcardnumber, crd_last4digits, tycrd_uuid, brcrd_uuid, ban_uuid, crd_expirationdate, crd_creditlimit, crd_active, crd_createdat, crd_updatedat });
+            let { 
+                usr_uuid, 
+                crd_uuid, 
+                scp_uuid,
+                crd_alias, 
+                crd_cardholdername, 
+                crd_maskedcardnumber, 
+                crd_last4digits, 
+                tycrd_uuid, 
+                brcrd_uuid, 
+                ban_uuid, 
+                crd_expirationdate, 
+                crd_creditlimit, 
+                crd_active, 
+                crd_allowdelegation, 
+                crd_createdat, 
+                crd_updatedat 
+            } = card;
+
+            const result = await SequelizeCard.create({ 
+                usr_uuid, 
+                crd_uuid, 
+                scp_uuid,
+                crd_alias, 
+                crd_cardholdername, 
+                crd_maskedcardnumber, 
+                crd_last4digits, 
+                tycrd_uuid, 
+                brcrd_uuid, 
+                ban_uuid, 
+                crd_expirationdate, 
+                crd_creditlimit, 
+                crd_active: crd_active ?? true, 
+                crd_allowdelegation: crd_allowdelegation ?? false, 
+                crd_createdat, 
+                crd_updatedat 
+            });
+
             if(!result) {
                 throw new Error(`No se ha agregado la tarjeta`);
             }
-            let newCard = result.dataValues as SequelizeCard
-            return newCard;
+            return result.get({ plain: true }) as CardEntity;
         } catch (error: any) {
             console.error('Error en createCard:', error.message);
             throw error;
@@ -79,6 +130,9 @@ export class SequelizeCardRepository implements CardRepository {
         try {
             const [updatedCount, [updatedCard]] = await SequelizeCard.update(
                 {
+                    scp_uuid: card.scp_uuid,
+                    crd_alias: card.crd_alias,
+                    crd_cardholdername: card.crd_cardholdername,
                     crd_maskedcardnumber: card.crd_maskedcardnumber,
                     crd_last4digits: card.crd_last4digits,
                     tycrd_uuid: card.tycrd_uuid,
@@ -86,7 +140,8 @@ export class SequelizeCardRepository implements CardRepository {
                     ban_uuid: card.ban_uuid,
                     crd_expirationdate: card.crd_expirationdate,
                     crd_creditlimit: card.crd_creditlimit,
-                    crd_active: card.crd_active
+                    crd_active: card.crd_active,
+                    crd_allowdelegation: card.crd_allowdelegation
                 },
                 {
                     where: { usr_uuid, crd_uuid },
@@ -109,7 +164,7 @@ export class SequelizeCardRepository implements CardRepository {
             const result = await SequelizeCard.destroy({ where: { usr_uuid, crd_uuid } });
             if(!result) {
                 throw new Error(`No se ha eliminado la tarjeta`);
-            };
+            }
             return card;
         } catch (error: any) {
             console.error('Error en deleteCard:', error.message);
@@ -126,7 +181,7 @@ export class SequelizeCardRepository implements CardRepository {
             const card = await SequelizeCard.findOne({ 
                 where: whereCondition
             });
-            return card;
+            return card ? (card.get({ plain: true }) as CardEntity) : null;
         } catch (error: any) {
             console.error('Error en findCardByMaskedNumber:', error.message);
             throw error;
@@ -141,7 +196,7 @@ export class SequelizeCardRepository implements CardRepository {
                     tycrd_uuid: tycrd_uuid ?? null
                 }
             });
-            return cards;
+            return cards.map(c => c.get({ plain: true }) as CardEntity);
         } catch (error: any) {
             console.error('Error en findCardsByType:', error.message);
             throw error;
@@ -156,7 +211,7 @@ export class SequelizeCardRepository implements CardRepository {
                     brcrd_uuid: brcrd_uuid ?? null
                 }
             });
-            return cards;
+            return cards.map(c => c.get({ plain: true }) as CardEntity);
         } catch (error: any) {
             console.error('Error en findCardsByBrand:', error.message);
             throw error;
@@ -171,7 +226,7 @@ export class SequelizeCardRepository implements CardRepository {
                     ban_uuid: ban_uuid ?? null
                 }
             });
-            return cards;
+            return cards.map(c => c.get({ plain: true }) as CardEntity);
         } catch (error: any) {
             console.error('Error en findCardsByBank:', error.message);
             throw error;
@@ -186,7 +241,7 @@ export class SequelizeCardRepository implements CardRepository {
                     crd_active: true
                 }
             });
-            return cards;
+            return cards.map(c => c.get({ plain: true }) as CardEntity);
         } catch (error: any) {
             console.error('Error en findActiveCards:', error.message);
             throw error;

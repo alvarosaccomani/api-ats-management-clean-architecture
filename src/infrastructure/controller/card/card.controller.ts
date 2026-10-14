@@ -15,17 +15,18 @@ export class CardController {
     public async getAllCtrl(req: Request, res: Response) {
         try {
             const usr_uuid = req.params.usr_uuid;
+            const scp_uuid = req.query.scp_uuid as string | undefined;
             const page = (req.params.page ? parseInt(req.params.page) : null);
             const perPage = (req.params.perPage ? parseInt(req.params.perPage) : null);
             if (page && perPage) {
-                const cards = await this.cardUseCase.getCards(usr_uuid);
+                const cards = await this.cardUseCase.getCards(usr_uuid, scp_uuid);
                 return res.status(200).send({
                     success: true,
                     message: 'Tarjetas retornadas.',
                     ...paginator(cards, page.toString(), perPage.toString())
                 });
             } else {
-                const cards = await this.cardUseCase.getCards(usr_uuid);
+                const cards = await this.cardUseCase.getCards(usr_uuid, scp_uuid);
                 return res.status(200).send({
                     success: true,
                     message: 'Tarjetas retornadas.',
