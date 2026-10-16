@@ -20,7 +20,6 @@ export class AuthService {
             usr_nick: user.usr_nick,
             usr_name: user.usr_name,
             usr_surname: user.usr_surname,
-            usr_image: user.usr_image,
             usr_email: user.usr_email,
             iat: moment().unix(), // Tiempo de emisión
             exp: moment().add(30, 'days').unix(), // Expiración en 30 días

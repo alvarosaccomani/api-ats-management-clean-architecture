@@ -10,7 +10,6 @@ export function createToken(user: UserEntity) {
         usr_nick: user.usr_nick,
         usr_name: user.usr_name,
         usr_surname: user.usr_surname,
-        usr_image: user.usr_image,
         usr_email: user.usr_email,
         iat: moment().unix(),
         exp: moment().add(30, 'days').unix()
