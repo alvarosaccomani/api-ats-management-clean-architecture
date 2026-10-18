@@ -2,11 +2,13 @@ import { Express } from 'express';
 import { TransactionUseCase } from '../../../application/transaction/transaction-use-case';
 import { TransactionController } from '../../controller/transaction/transaction.controller';
 import { SequelizeTransactionRepository } from '../../repository/transaction/sequelize-transaction.repository';
+import { SequelizePersonRepository } from '../../repository/person/sequelize-person.repository';
 import SocketAdapter from "../../services/socketAdapter";
 
 function configureTransactionRoutes(app: Express, socketAdapter: SocketAdapter) {
     const transactionRepository = new SequelizeTransactionRepository();
-    const transactionUseCase = new TransactionUseCase(transactionRepository);
+    const personRepository = new SequelizePersonRepository();
+    const transactionUseCase = new TransactionUseCase(transactionRepository, personRepository);
     const transactionCtrl = new TransactionController(transactionUseCase);
 
     const apiPrefix = process.env.BASE_URL_API ? `/${process.env.BASE_URL_API}` : '/api';
