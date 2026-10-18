@@ -88,23 +88,6 @@ export class SequelizeTransactionRepository implements TransactionRepository {
                 trx_updatedat 
             } = transaction;
 
-            let finalCommissionRate = trx_commissionrate;
-            let finalCommissionAmount = trx_commissionamount;
-
-            // Auto-calculate commission if it's an INGRESO (sale)
-            if (trx_type === 'INGRESO' && prs_uuid) {
-                if (finalCommissionRate === undefined || finalCommissionRate === null) {
-                    const person = await SequelizePerson.findOne({ where: { prs_uuid } });
-                    if (person && person.prs_commissionrate != null) {
-                        finalCommissionRate = person.prs_commissionrate;
-                    }
-                }
-
-                if (finalCommissionRate != null && (finalCommissionAmount === undefined || finalCommissionAmount === null)) {
-                    finalCommissionAmount = Math.round(((trx_amount * finalCommissionRate) / 100) * 100) / 100;
-                }
-            }
-
             const result = await SequelizeTransaction.create({
                 trx_uuid,
                 scp_uuid,
@@ -117,8 +100,8 @@ export class SequelizeTransactionRepository implements TransactionRepository {
                 target_crduuid,
                 trx_concept,
                 prs_uuid,
-                trx_commissionrate: finalCommissionRate,
-                trx_commissionamount: finalCommissionAmount,
+                trx_commissionrate: trx_commissionrate ?? null,
+                trx_commissionamount: trx_commissionamount ?? null,
                 trx_notes,
                 trx_createdat,
                 trx_updatedat
@@ -136,13 +119,6 @@ export class SequelizeTransactionRepository implements TransactionRepository {
 
     async updateTransaction(trx_uuid: string, transaction: TransactionUpdateData): Promise<TransactionEntity | null> {
         try {
-            let finalCommissionRate = transaction.trx_commissionrate;
-            let finalCommissionAmount = transaction.trx_commissionamount;
-
-            if (transaction.trx_type === 'INGRESO' && finalCommissionRate != null && finalCommissionAmount == null) {
-                finalCommissionAmount = Math.round(((transaction.trx_amount * finalCommissionRate) / 100) * 100) / 100;
-            }
-
             const [updatedCount, [updatedTransaction]] = await SequelizeTransaction.update(
                 {
                     scp_uuid: transaction.scp_uuid,
@@ -154,8 +130,8 @@ export class SequelizeTransactionRepository implements TransactionRepository {
                     target_crduuid: transaction.target_crduuid,
                     trx_concept: transaction.trx_concept,
                     prs_uuid: transaction.prs_uuid,
-                    trx_commissionrate: finalCommissionRate,
-                    trx_commissionamount: finalCommissionAmount,
+                    trx_commissionrate: transaction.trx_commissionrate ?? null,
+                    trx_commissionamount: transaction.trx_commissionamount ?? null,
                     trx_notes: transaction.trx_notes
                 },
                 {
