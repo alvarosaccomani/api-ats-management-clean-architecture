@@ -88,20 +88,15 @@ export class CardController {
                     error: 'Debe proporcionar un Id de usuario.'
                 })
             };
-            if(!crd_maskedcardnumber) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'No se pudo insertar la tarjeta.',
-                    error: 'Debe proporcionar un Número de tarjeta enmascarado.'
-                })
-            };
-            const cardByMaskedNumber = await this.cardUseCase.findCardByMaskedNumber(usr_uuid, crd_maskedcardnumber);
-            if(cardByMaskedNumber) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'No se pudo insertar la tarjeta.',
-                    error: `El número de tarjeta enmascarado ${crd_maskedcardnumber} ya existe.`
-                });
+            if (crd_maskedcardnumber && crd_maskedcardnumber.trim() !== '') {
+                const cardByMaskedNumber = await this.cardUseCase.findCardByMaskedNumber(usr_uuid, crd_maskedcardnumber);
+                if(cardByMaskedNumber) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'No se pudo insertar la tarjeta.',
+                        error: `El número de tarjeta enmascarado ${crd_maskedcardnumber} ya existe.`
+                    });
+                }
             }
             const card = await this.cardUseCase.createCard(body)
             return res.status(200).json({
@@ -125,20 +120,15 @@ export class CardController {
             const crd_uuid = req.params.crd_uuid;
             const update = req.body;
             const crd_maskedcardnumber = update.crd_maskedcardnumber;
-            if(!crd_maskedcardnumber) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'No se pudo actualizar la tarjeta.',
-                    error: 'Debe proporcionar un Número de tarjeta enmascarado.'
-                })
-            };
-            const cardByMaskedNumber = await this.cardUseCase.findCardByMaskedNumber(usr_uuid, crd_maskedcardnumber, crd_uuid);
-            if(cardByMaskedNumber) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'No se pudo actualizar la tarjeta.',
-                    error: `El número de tarjeta enmascarado ${crd_maskedcardnumber} ya existe.`
-                });
+            if (crd_maskedcardnumber && crd_maskedcardnumber.trim() !== '') {
+                const cardByMaskedNumber = await this.cardUseCase.findCardByMaskedNumber(usr_uuid, crd_maskedcardnumber, crd_uuid);
+                if(cardByMaskedNumber) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'No se pudo actualizar la tarjeta.',
+                        error: `El número de tarjeta enmascarado ${crd_maskedcardnumber} ya existe.`
+                    });
+                }
             }
             const card = await this.cardUseCase.updateCard(usr_uuid, crd_uuid, update)
             return res.status(200).json({

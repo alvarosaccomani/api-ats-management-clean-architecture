@@ -6,5 +6,5 @@ export interface CardRepository {
     createCard(card: CardEntity): Promise<CardEntity | null>;
     updateCard(usr_uuid: string, crd_uuid: string, card: CardUpdateData): Promise<CardEntity | null>;
     deleteCard(usr_uuid: string, crd_uuid: string): Promise<CardEntity | null>;
-    findCardByMaskedNumber(usr_uuid: string, crd_maskedcardnumber: string, excludeUuid?: string | null): Promise<CardEntity | null>;
+    findCardByMaskedNumber(usr_uuid: string, crd_maskedcardnumber?: string | null, excludeUuid?: string | null): Promise<CardEntity | null>;
 }

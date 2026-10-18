@@ -17,16 +17,18 @@ export class SequelizeCard extends Model<CardEntity, Omit<CardEntity, 'id'>> {
   declare scp?: SequelizeScope;
   declare crd_alias?: string | null;
   declare crd_cardholdername?: string | null;
-  declare crd_maskedcardnumber: string;
-  declare crd_last4digits: string;
+  declare crd_maskedcardnumber?: string | null;
+  declare crd_last4digits?: string | null;
   declare tycrd_uuid: string;
   declare tycrd?: TypeCardEntity;
-  declare brcrd_uuid: string;
+  declare brcrd_uuid?: string | null;
   declare brcrd?: BrandCardEntity;
-  declare ban_uuid: string;
+  declare ban_uuid?: string | null;
   declare ban?: BankEntity;
-  declare crd_expirationdate: Date;
+  declare crd_expirationdate?: Date | null;
   declare crd_creditlimit: number | null;
+  declare crd_cbucvu?: string | null;
+  declare crd_cbualias?: string | null;
   declare crd_active: boolean;
   declare crd_allowdelegation: boolean;
   declare crd_createdat: Date;
@@ -59,11 +61,11 @@ SequelizeCard.init({
   },
   crd_maskedcardnumber: {
     type: DataTypes.STRING(19),
-    allowNull: false
+    allowNull: true
   },
   crd_last4digits: {
     type: DataTypes.STRING(4),
-    allowNull: false
+    allowNull: true
   },
   tycrd_uuid: {
     type: DataTypes.STRING,
@@ -71,18 +73,26 @@ SequelizeCard.init({
   },
   brcrd_uuid: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   ban_uuid: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   crd_expirationdate: {
     type: DataTypes.DATEONLY,
-    allowNull: false
+    allowNull: true
   },
   crd_creditlimit: {
     type: DataTypes.FLOAT,
+    allowNull: true
+  },
+  crd_cbucvu: {
+    type: DataTypes.STRING(22),
+    allowNull: true
+  },
+  crd_cbualias: {
+    type: DataTypes.STRING(100),
     allowNull: true
   },
   crd_active: {

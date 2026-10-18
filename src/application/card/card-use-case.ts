@@ -37,6 +37,8 @@ export class CardUseCase {
                 ban: card.ban,
                 crd_expirationdate: card.crd_expirationdate,
                 crd_creditlimit: card.crd_creditlimit,
+                crd_cbucvu: card.crd_cbucvu,
+                crd_cbualias: card.crd_cbualias,
                 crd_active: card.crd_active,
                 crd_allowdelegation: card.crd_allowdelegation ?? false,
                 crd_createdat: TimezoneConverter.toIsoStringInTimezone(card.crd_createdat, 'America/Buenos_Aires'),
@@ -68,6 +70,8 @@ export class CardUseCase {
                 ban_uuid: card.ban_uuid,
                 crd_expirationdate: card.crd_expirationdate,
                 crd_creditlimit: card.crd_creditlimit,
+                crd_cbucvu: card.crd_cbucvu,
+                crd_cbualias: card.crd_cbualias,
                 crd_active: card.crd_active,
                 crd_allowdelegation: card.crd_allowdelegation ?? false,
                 crd_createdat: TimezoneConverter.toIsoStringInTimezone(card.crd_createdat, 'America/Buenos_Aires'),
@@ -92,6 +96,8 @@ export class CardUseCase {
         ban_uuid, 
         crd_expirationdate, 
         crd_creditlimit, 
+        crd_cbucvu,
+        crd_cbualias,
         crd_active,
         crd_allowdelegation
     } : { 
@@ -100,13 +106,15 @@ export class CardUseCase {
         scp_uuid?: string | null,
         crd_alias?: string | null,
         crd_cardholdername?: string | null,
-        crd_maskedcardnumber: string,
-        crd_last4digits: string,
+        crd_maskedcardnumber?: string | null,
+        crd_last4digits?: string | null,
         tycrd_uuid: string,
-        brcrd_uuid: string,
-        ban_uuid: string,
-        crd_expirationdate: Date,
+        brcrd_uuid?: string | null,
+        ban_uuid?: string | null,
+        crd_expirationdate?: Date | null,
         crd_creditlimit?: number | null,
+        crd_cbucvu?: string | null,
+        crd_cbualias?: string | null,
         crd_active?: boolean,
         crd_allowdelegation?: boolean
     }) {
@@ -124,6 +132,8 @@ export class CardUseCase {
                 ban_uuid, 
                 crd_expirationdate, 
                 crd_creditlimit, 
+                crd_cbucvu,
+                crd_cbualias,
                 crd_active,
                 crd_allowdelegation
             });
@@ -144,6 +154,8 @@ export class CardUseCase {
                 ban_uuid: cardCreated.ban_uuid,
                 crd_expirationdate: cardCreated.crd_expirationdate,
                 crd_creditlimit: cardCreated.crd_creditlimit,
+                crd_cbucvu: cardCreated.crd_cbucvu,
+                crd_cbualias: cardCreated.crd_cbualias,
                 crd_active: cardCreated.crd_active,
                 crd_allowdelegation: cardCreated.crd_allowdelegation ?? false,
                 crd_createdat: TimezoneConverter.toIsoStringInTimezone(cardCreated.crd_createdat, 'America/Buenos_Aires'),
@@ -166,19 +178,23 @@ export class CardUseCase {
         ban_uuid, 
         crd_expirationdate, 
         crd_creditlimit, 
+        crd_cbucvu,
+        crd_cbualias,
         crd_active,
         crd_allowdelegation
     } : { 
         scp_uuid?: string | null,
         crd_alias?: string | null,
         crd_cardholdername?: string | null,
-        crd_maskedcardnumber: string,
-        crd_last4digits: string,
+        crd_maskedcardnumber?: string | null,
+        crd_last4digits?: string | null,
         tycrd_uuid: string,
-        brcrd_uuid: string,
-        ban_uuid: string,
-        crd_expirationdate: Date,
-        crd_creditlimit: number | null,
+        brcrd_uuid?: string | null,
+        ban_uuid?: string | null,
+        crd_expirationdate?: Date | null,
+        crd_creditlimit?: number | null,
+        crd_cbucvu?: string | null,
+        crd_cbualias?: string | null,
         crd_active: boolean,
         crd_allowdelegation?: boolean
     }) {
@@ -194,6 +210,8 @@ export class CardUseCase {
                 ban_uuid, 
                 crd_expirationdate, 
                 crd_creditlimit, 
+                crd_cbucvu,
+                crd_cbualias,
                 crd_active,
                 crd_allowdelegation
             });
@@ -213,6 +231,8 @@ export class CardUseCase {
                 ban_uuid: cardUpdated.ban_uuid,
                 crd_expirationdate: cardUpdated.crd_expirationdate,
                 crd_creditlimit: cardUpdated.crd_creditlimit,
+                crd_cbucvu: cardUpdated.crd_cbucvu,
+                crd_cbualias: cardUpdated.crd_cbualias,
                 crd_active: cardUpdated.crd_active,
                 crd_allowdelegation: cardUpdated.crd_allowdelegation ?? false,
                 crd_createdat: TimezoneConverter.toIsoStringInTimezone(cardUpdated.crd_createdat, 'America/Buenos_Aires'),
@@ -242,6 +262,8 @@ export class CardUseCase {
                 ban_uuid: cardDeleted.ban_uuid,
                 crd_expirationdate: cardDeleted.crd_expirationdate,
                 crd_creditlimit: cardDeleted.crd_creditlimit,
+                crd_cbucvu: cardDeleted.crd_cbucvu,
+                crd_cbualias: cardDeleted.crd_cbualias,
                 crd_active: cardDeleted.crd_active,
                 crd_allowdelegation: cardDeleted.crd_allowdelegation ?? false,
                 crd_createdat: TimezoneConverter.toIsoStringInTimezone(cardDeleted.crd_createdat, 'America/Buenos_Aires'),
@@ -253,8 +275,11 @@ export class CardUseCase {
         }
     }
 
-    public async findCardByMaskedNumber(usr_uuid: string, crd_maskedcardnumber: string, excludeUuid?: string) {
+    public async findCardByMaskedNumber(usr_uuid: string, crd_maskedcardnumber?: string | null, excludeUuid?: string) {
         try {
+            if (!crd_maskedcardnumber || crd_maskedcardnumber.trim() === '') {
+                return null;
+            }
             const card = await this.cardRepository.findCardByMaskedNumber(usr_uuid, crd_maskedcardnumber, excludeUuid)
             if(card) {
                 throw new Error(`Ya existe una tarjeta con el número enmascarado ${crd_maskedcardnumber}.`);

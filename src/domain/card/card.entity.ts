@@ -12,16 +12,18 @@ export interface CardEntity {
     scp?: ScopeEntity;
     crd_alias?: string | null;
     crd_cardholdername?: string | null;
-    crd_maskedcardnumber: string;
-    crd_last4digits: string;
+    crd_maskedcardnumber?: string | null;
+    crd_last4digits?: string | null;
     tycrd_uuid: string;
     tycrd?: TypeCardEntity;
-    brcrd_uuid: string;
+    brcrd_uuid?: string | null;
     brcrd?: BrandCardEntity;
-    ban_uuid: string;
+    ban_uuid?: string | null;
     ban?: BankEntity;
-    crd_expirationdate: Date;
-    crd_creditlimit: number | null;
+    crd_expirationdate?: Date | null;
+    crd_creditlimit?: number | null;
+    crd_cbucvu?: string | null;
+    crd_cbualias?: string | null;
     crd_active: boolean;
     crd_allowdelegation?: boolean;
     crd_createdat: Date;
@@ -41,6 +43,8 @@ export type CardUpdateData = Pick<CardEntity,
     'ban_uuid' | 
     'crd_expirationdate' | 
     'crd_creditlimit' | 
+    'crd_cbucvu' |
+    'crd_cbualias' |
     'crd_active' | 
     'crd_allowdelegation'
 >;

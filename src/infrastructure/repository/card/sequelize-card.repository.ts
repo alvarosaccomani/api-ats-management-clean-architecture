@@ -39,7 +39,7 @@ export class SequelizeCardRepository implements CardRepository {
                     }
                 ],
                 order: [
-                    [Sequelize.col('crd_maskedcardnumber'), 'ASC']
+                    [Sequelize.literal('COALESCE(crd_alias, crd_maskedcardnumber, crd_cbualias)'), 'ASC']
                 ]
             });
             if(!cards) {
@@ -91,6 +91,8 @@ export class SequelizeCardRepository implements CardRepository {
                 ban_uuid, 
                 crd_expirationdate, 
                 crd_creditlimit, 
+                crd_cbucvu,
+                crd_cbualias,
                 crd_active, 
                 crd_allowdelegation, 
                 crd_createdat, 
@@ -110,6 +112,8 @@ export class SequelizeCardRepository implements CardRepository {
                 ban_uuid, 
                 crd_expirationdate, 
                 crd_creditlimit, 
+                crd_cbucvu,
+                crd_cbualias,
                 crd_active: crd_active ?? true, 
                 crd_allowdelegation: crd_allowdelegation ?? false, 
                 crd_createdat, 
@@ -140,6 +144,8 @@ export class SequelizeCardRepository implements CardRepository {
                     ban_uuid: card.ban_uuid,
                     crd_expirationdate: card.crd_expirationdate,
                     crd_creditlimit: card.crd_creditlimit,
+                    crd_cbucvu: card.crd_cbucvu,
+                    crd_cbualias: card.crd_cbualias,
                     crd_active: card.crd_active,
                     crd_allowdelegation: card.crd_allowdelegation
                 },
@@ -172,9 +178,12 @@ export class SequelizeCardRepository implements CardRepository {
         }
     }
 
-    async findCardByMaskedNumber(usr_uuid: string, crd_maskedcardnumber: string, excludeUuid?: string | null): Promise<CardEntity | null> {
+    async findCardByMaskedNumber(usr_uuid: string, crd_maskedcardnumber?: string | null, excludeUuid?: string | null): Promise<CardEntity | null> {
         try {
-            const whereCondition: any = { usr_uuid, crd_maskedcardnumber: crd_maskedcardnumber ?? null };
+            if (!crd_maskedcardnumber || crd_maskedcardnumber.trim() === '') {
+                return null;
+            }
+            const whereCondition: any = { usr_uuid, crd_maskedcardnumber };
             if (excludeUuid) {
                 whereCondition.crd_uuid = { [Op.ne]: excludeUuid };
             }
