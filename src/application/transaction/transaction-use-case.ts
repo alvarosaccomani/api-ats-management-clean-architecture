@@ -1,10 +1,12 @@
 import { TransactionRepository } from "../../domain/transaction/transaction.repository";
 import { TransactionValue } from "../../domain/transaction/transaction.value";
+import { PersonRepository } from "../../domain/person/person.repository";
 import { TimezoneConverter } from "../../infrastructure/utils/TimezoneConverter";
 
 export class TransactionUseCase {
     constructor(
-        private readonly transactionRepository: TransactionRepository
+        private readonly transactionRepository: TransactionRepository,
+        private readonly personRepository?: PersonRepository
     ) {
         this.getTransactions = this.getTransactions.bind(this);
         this.getDetailTransaction = this.getDetailTransaction.bind(this);
@@ -33,6 +35,8 @@ export class TransactionUseCase {
                 trx_concept: t.trx_concept,
                 prs_uuid: t.prs_uuid,
                 prs: t.prs,
+                trx_commissionrate: t.trx_commissionrate ?? null,
+                trx_commissionamount: t.trx_commissionamount ?? null,
                 trx_notes: t.trx_notes,
                 trx_createdat: TimezoneConverter.toIsoStringInTimezone(t.trx_createdat, 'America/Buenos_Aires'),
                 trx_updatedat: TimezoneConverter.toIsoStringInTimezone(t.trx_updatedat, 'America/Buenos_Aires'),
@@ -63,6 +67,8 @@ export class TransactionUseCase {
                 trx_concept: t.trx_concept,
                 prs_uuid: t.prs_uuid,
                 prs: t.prs,
+                trx_commissionrate: t.trx_commissionrate ?? null,
+                trx_commissionamount: t.trx_commissionamount ?? null,
                 trx_notes: t.trx_notes,
                 trx_createdat: TimezoneConverter.toIsoStringInTimezone(t.trx_createdat, 'America/Buenos_Aires'),
                 trx_updatedat: TimezoneConverter.toIsoStringInTimezone(t.trx_updatedat, 'America/Buenos_Aires'),
@@ -85,6 +91,8 @@ export class TransactionUseCase {
         target_crduuid,
         trx_concept,
         prs_uuid,
+        trx_commissionrate,
+        trx_commissionamount,
         trx_notes
     }: {
         trx_uuid?: string;
@@ -98,9 +106,28 @@ export class TransactionUseCase {
         target_crduuid?: string | null;
         trx_concept: string;
         prs_uuid?: string | null;
+        trx_commissionrate?: number | null;
+        trx_commissionamount?: number | null;
         trx_notes?: string | null;
     }) {
         try {
+            let finalCommissionRate = trx_commissionrate;
+            let finalCommissionAmount = trx_commissionamount;
+
+            // Regla de Negocio: Cálculo automático de comisión para ingresos con contacto asociado
+            if (trx_type === 'INGRESO' && prs_uuid) {
+                if ((finalCommissionRate === undefined || finalCommissionRate === null) && this.personRepository) {
+                    const person = await this.personRepository.findPersonById(prs_uuid);
+                    if (person && person.prs_commissionrate != null) {
+                        finalCommissionRate = person.prs_commissionrate;
+                    }
+                }
+
+                if (finalCommissionRate != null && (finalCommissionAmount === undefined || finalCommissionAmount === null)) {
+                    finalCommissionAmount = Math.round(((trx_amount * finalCommissionRate) / 100) * 100) / 100;
+                }
+            }
+
             const transactionValue = new TransactionValue({
                 trx_uuid,
                 scp_uuid,
@@ -113,6 +140,8 @@ export class TransactionUseCase {
                 target_crduuid,
                 trx_concept,
                 prs_uuid,
+                trx_commissionrate: finalCommissionRate,
+                trx_commissionamount: finalCommissionAmount,
                 trx_notes
             });
             const created = await this.transactionRepository.createTransaction(transactionValue);
@@ -131,6 +160,8 @@ export class TransactionUseCase {
                 target_crduuid: created.target_crduuid,
                 trx_concept: created.trx_concept,
                 prs_uuid: created.prs_uuid,
+                trx_commissionrate: created.trx_commissionrate ?? null,
+                trx_commissionamount: created.trx_commissionamount ?? null,
                 trx_notes: created.trx_notes,
                 trx_createdat: TimezoneConverter.toIsoStringInTimezone(created.trx_createdat, 'America/Buenos_Aires'),
                 trx_updatedat: TimezoneConverter.toIsoStringInTimezone(created.trx_updatedat, 'America/Buenos_Aires'),
@@ -151,6 +182,8 @@ export class TransactionUseCase {
         target_crduuid,
         trx_concept,
         prs_uuid,
+        trx_commissionrate,
+        trx_commissionamount,
         trx_notes
     }: {
         scp_uuid: string;
@@ -162,9 +195,27 @@ export class TransactionUseCase {
         target_crduuid?: string | null;
         trx_concept: string;
         prs_uuid?: string | null;
+        trx_commissionrate?: number | null;
+        trx_commissionamount?: number | null;
         trx_notes?: string | null;
     }) {
         try {
+            let finalCommissionRate = trx_commissionrate;
+            let finalCommissionAmount = trx_commissionamount;
+
+            if (trx_type === 'INGRESO' && prs_uuid) {
+                if ((finalCommissionRate === undefined || finalCommissionRate === null) && this.personRepository) {
+                    const person = await this.personRepository.findPersonById(prs_uuid);
+                    if (person && person.prs_commissionrate != null) {
+                        finalCommissionRate = person.prs_commissionrate;
+                    }
+                }
+
+                if (finalCommissionRate != null && (finalCommissionAmount === undefined || finalCommissionAmount === null)) {
+                    finalCommissionAmount = Math.round(((trx_amount * finalCommissionRate) / 100) * 100) / 100;
+                }
+            }
+
             const updated = await this.transactionRepository.updateTransaction(trx_uuid, {
                 scp_uuid,
                 trx_type,
@@ -175,6 +226,8 @@ export class TransactionUseCase {
                 target_crduuid,
                 trx_concept,
                 prs_uuid,
+                trx_commissionrate: finalCommissionRate,
+                trx_commissionamount: finalCommissionAmount,
                 trx_notes
             });
             if (!updated) {
@@ -192,6 +245,8 @@ export class TransactionUseCase {
                 target_crduuid: updated.target_crduuid,
                 trx_concept: updated.trx_concept,
                 prs_uuid: updated.prs_uuid,
+                trx_commissionrate: updated.trx_commissionrate ?? null,
+                trx_commissionamount: updated.trx_commissionamount ?? null,
                 trx_notes: updated.trx_notes,
                 trx_createdat: TimezoneConverter.toIsoStringInTimezone(updated.trx_createdat, 'America/Buenos_Aires'),
                 trx_updatedat: TimezoneConverter.toIsoStringInTimezone(updated.trx_updatedat, 'America/Buenos_Aires'),
