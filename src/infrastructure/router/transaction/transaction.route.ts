@@ -142,6 +142,55 @@ function configureTransactionRoutes(app: Express, socketAdapter: SocketAdapter) 
 
     /**
      * @swagger
+     * /transactions/bulk:
+     *   post:
+     *     tags:
+     *       - Transactions
+     *     summary: Crear múltiples transacciones en lote (Bulk)
+     *     description: Inserta un lote de transacciones financieras dentro de una única transacción atómica de base de datos. Si una falla, se cancelan todas.
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/TransactionBulkInputDTO'
+     *     responses:
+     *       201:
+     *         description: Transacciones creadas exitosamente.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success:
+     *                   type: boolean
+     *                   example: true
+     *                 count:
+     *                   type: integer
+     *                   example: 10
+     *                 data:
+     *                   type: array
+     *                   items:
+     *                     $ref: '#/components/schemas/TransactionEntity'
+     *       400:
+     *         description: Solicitud incorrecta (arreglo de transacciones inválido o vacío).
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     *       500:
+     *         description: Error interno al procesar la inserción masiva.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/ErrorResponse'
+     */
+    app.post(`${apiPrefix}/transactions/bulk`, transactionCtrl.bulkInsertCtrl);
+
+    /**
+     * @swagger
      * /transaction/{trx_uuid}:
      *   put:
      *     tags:

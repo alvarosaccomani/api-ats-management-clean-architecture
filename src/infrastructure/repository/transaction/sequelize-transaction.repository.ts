@@ -1,4 +1,5 @@
 import { Sequelize } from 'sequelize';
+import { sequelize } from '../../db/sequelize';
 import { TransactionEntity, TransactionUpdateData } from "../../../domain/transaction/transaction.entity";
 import { TransactionRepository } from "../../../domain/transaction/transaction.repository";
 import { SequelizeTransaction } from "../../model/transaction/transaction.model";
@@ -123,6 +124,43 @@ export class SequelizeTransactionRepository implements TransactionRepository {
             return result.get({ plain: true }) as TransactionEntity;
         } catch (error: any) {
             console.error('Error en createTransaction:', error.message);
+            throw error;
+        }
+    }
+
+    async createBulkTransactions(transactions: TransactionEntity[]): Promise<TransactionEntity[]> {
+        const t = await sequelize.transaction();
+        try {
+            const records = transactions.map(trx => ({
+                trx_uuid: trx.trx_uuid,
+                scp_uuid: trx.scp_uuid,
+                usr_uuidcreator: trx.usr_uuidcreator,
+                trx_type: trx.trx_type,
+                trx_datetime: trx.trx_datetime,
+                trx_amount: trx.trx_amount,
+                trx_currency: trx.trx_currency ?? 'ARS',
+                crd_uuid: trx.crd_uuid,
+                target_crduuid: trx.target_crduuid,
+                trx_concept: trx.trx_concept,
+                prs_uuid: trx.prs_uuid,
+                prs_uuidactor: trx.prs_uuidactor,
+                trx_commissionrate: trx.trx_commissionrate ?? null,
+                trx_commissionamount: trx.trx_commissionamount ?? null,
+                trx_notes: trx.trx_notes,
+                trx_createdat: trx.trx_createdat,
+                trx_updatedat: trx.trx_updatedat
+            }));
+
+            const created = await SequelizeTransaction.bulkCreate(records, {
+                transaction: t,
+                validate: true
+            });
+
+            await t.commit();
+            return created.map(c => c.get({ plain: true }) as TransactionEntity);
+        } catch (error: any) {
+            await t.rollback();
+            console.error('Error en createBulkTransactions:', error.message);
             throw error;
         }
     }

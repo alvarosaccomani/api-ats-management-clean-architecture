@@ -11,6 +11,7 @@ export class TransactionUseCase {
         this.getTransactions = this.getTransactions.bind(this);
         this.getDetailTransaction = this.getDetailTransaction.bind(this);
         this.createTransaction = this.createTransaction.bind(this);
+        this.createBulkTransactions = this.createBulkTransactions.bind(this);
         this.updateTransaction = this.updateTransaction.bind(this);
         this.deleteTransaction = this.deleteTransaction.bind(this);
     }
@@ -177,6 +178,50 @@ export class TransactionUseCase {
             };
         } catch (error: any) {
             console.error('Error en createTransaction (use case):', error.message);
+            throw error;
+        }
+    }
+
+    public async createBulkTransactions(transactionsInput: any[]) {
+        try {
+            const values = transactionsInput.map(item => new TransactionValue({
+                trx_uuid: item.trx_uuid,
+                scp_uuid: item.scp_uuid,
+                usr_uuidcreator: item.usr_uuidcreator,
+                trx_type: item.trx_type || 'EGRESO',
+                trx_datetime: item.trx_datetime ? new Date(item.trx_datetime) : undefined,
+                trx_amount: Number(item.trx_amount) || 0,
+                trx_currency: item.trx_currency || 'ARS',
+                crd_uuid: item.crd_uuid || null,
+                target_crduuid: item.target_crduuid || null,
+                trx_concept: item.trx_concept,
+                prs_uuid: item.prs_uuid || null,
+                prs_uuidactor: item.prs_uuidactor || null,
+                trx_commissionrate: item.trx_commissionrate != null ? Number(item.trx_commissionrate) : null,
+                trx_commissionamount: item.trx_commissionamount != null ? Number(item.trx_commissionamount) : null,
+                trx_notes: item.trx_notes || null
+            }));
+
+            const created = await this.transactionRepository.createBulkTransactions(values);
+            return created.map(t => ({
+                trx_uuid: t.trx_uuid,
+                scp_uuid: t.scp_uuid,
+                usr_uuidcreator: t.usr_uuidcreator,
+                trx_type: t.trx_type,
+                trx_datetime: TimezoneConverter.toIsoStringInTimezone(t.trx_datetime, 'America/Buenos_Aires'),
+                trx_amount: t.trx_amount,
+                trx_currency: t.trx_currency,
+                crd_uuid: t.crd_uuid,
+                target_crduuid: t.target_crduuid,
+                trx_concept: t.trx_concept,
+                prs_uuid: t.prs_uuid,
+                prs_uuidactor: t.prs_uuidactor,
+                trx_notes: t.trx_notes,
+                trx_createdat: TimezoneConverter.toIsoStringInTimezone(t.trx_createdat, 'America/Buenos_Aires'),
+                trx_updatedat: TimezoneConverter.toIsoStringInTimezone(t.trx_updatedat, 'America/Buenos_Aires'),
+            }));
+        } catch (error: any) {
+            console.error('Error en createBulkTransactions (use case):', error.message);
             throw error;
         }
     }

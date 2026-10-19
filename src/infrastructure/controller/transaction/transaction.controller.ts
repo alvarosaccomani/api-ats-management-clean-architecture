@@ -6,6 +6,7 @@ export class TransactionController {
         this.getAllCtrl = this.getAllCtrl.bind(this);
         this.getDetailCtrl = this.getDetailCtrl.bind(this);
         this.insertCtrl = this.insertCtrl.bind(this);
+        this.bulkInsertCtrl = this.bulkInsertCtrl.bind(this);
         this.updateCtrl = this.updateCtrl.bind(this);
         this.deleteCtrl = this.deleteCtrl.bind(this);
     }
@@ -35,6 +36,19 @@ export class TransactionController {
         try {
             const transaction = await this.transactionUseCase.createTransaction(req.body);
             res.status(201).send({ success: true, data: transaction });
+        } catch (error: any) {
+            res.status(500).send({ success: false, error: error.message });
+        }
+    }
+
+    public async bulkInsertCtrl(req: Request, res: Response) {
+        try {
+            const { transactions } = req.body;
+            if (!Array.isArray(transactions) || transactions.length === 0) {
+                return res.status(400).send({ success: false, error: 'Se requiere un arreglo de transacciones' });
+            }
+            const created = await this.transactionUseCase.createBulkTransactions(transactions);
+            res.status(201).send({ success: true, count: created.length, data: created });
         } catch (error: any) {
             res.status(500).send({ success: false, error: error.message });
         }

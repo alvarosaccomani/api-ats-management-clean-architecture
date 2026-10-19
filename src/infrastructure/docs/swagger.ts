@@ -724,9 +724,23 @@ const swaggerOptions: OAS3Options = {
             target_crduuid: { type: 'string', format: 'uuid', example: null },
             trx_concept: { type: 'string', example: 'Compra de insumos' },
             prs_uuid: { type: 'string', format: 'uuid', example: '1a7e8400-e29b-41d4-a716-446655440000' },
+            prs_uuidactor: { type: 'string', format: 'uuid', example: '3c9e8400-e29b-41d4-a716-446655440002' },
             trx_commissionrate: { type: 'number', example: 2.5 },
             trx_commissionamount: { type: 'number', example: 385.01 },
             trx_notes: { type: 'string', example: 'Detalle adicional' },
+          },
+        },
+        TransactionBulkInputDTO: {
+          type: 'object',
+          required: ['transactions'],
+          properties: {
+            transactions: {
+              type: 'array',
+              description: 'Arreglo de transacciones a insertar masivamente en una única transacción atómica',
+              items: {
+                $ref: '#/components/schemas/TransactionInputDTO',
+              },
+            },
           },
         },
         TransactionUpdateDTO: {
