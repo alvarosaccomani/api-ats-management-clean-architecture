@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import { CommissionRepository } from "../../../domain/commission/commission.repository";
 import { SellerCommissionSummaryEntity } from "../../../domain/commission/commission.entity";
 import { SequelizePerson } from "../../model/person/person.model";
@@ -31,12 +32,16 @@ export class SequelizeCommissionRepository implements CommissionRepository {
 
             const transactions = await SequelizeTransaction.findAll({
                 where: {
-                    prs_uuid: personUuids,
+                    [Op.or]: [
+                        { prs_uuidactor: personUuids },
+                        { prs_uuidactor: null, prs_uuid: personUuids }
+                    ],
                     trx_type: 'INGRESO'
                 },
                 include: [
                     { model: SequelizeScope, as: 'scp' },
-                    { model: SequelizePerson, as: 'prs' }
+                    { model: SequelizePerson, as: 'prs' },
+                    { model: SequelizePerson, as: 'actor' }
                 ],
                 order: [['trx_datetime', 'DESC']]
             });

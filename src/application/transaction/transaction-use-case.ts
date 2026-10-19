@@ -35,6 +35,8 @@ export class TransactionUseCase {
                 trx_concept: t.trx_concept,
                 prs_uuid: t.prs_uuid,
                 prs: t.prs,
+                prs_uuidactor: t.prs_uuidactor,
+                actor: t.actor,
                 trx_commissionrate: t.trx_commissionrate ?? null,
                 trx_commissionamount: t.trx_commissionamount ?? null,
                 trx_notes: t.trx_notes,
@@ -67,6 +69,8 @@ export class TransactionUseCase {
                 trx_concept: t.trx_concept,
                 prs_uuid: t.prs_uuid,
                 prs: t.prs,
+                prs_uuidactor: t.prs_uuidactor,
+                actor: t.actor,
                 trx_commissionrate: t.trx_commissionrate ?? null,
                 trx_commissionamount: t.trx_commissionamount ?? null,
                 trx_notes: t.trx_notes,
@@ -91,6 +95,7 @@ export class TransactionUseCase {
         target_crduuid,
         trx_concept,
         prs_uuid,
+        prs_uuidactor,
         trx_commissionrate,
         trx_commissionamount,
         trx_notes
@@ -106,6 +111,7 @@ export class TransactionUseCase {
         target_crduuid?: string | null;
         trx_concept: string;
         prs_uuid?: string | null;
+        prs_uuidactor?: string | null;
         trx_commissionrate?: number | null;
         trx_commissionamount?: number | null;
         trx_notes?: string | null;
@@ -114,10 +120,11 @@ export class TransactionUseCase {
             let finalCommissionRate = trx_commissionrate;
             let finalCommissionAmount = trx_commissionamount;
 
-            // Regla de Negocio: Cálculo automático de comisión para ingresos con contacto asociado
-            if (trx_type === 'INGRESO' && prs_uuid) {
+            // Regla de Negocio: Cálculo automático de comisión para ingresos con vendedor asociado
+            const sellerUuid = prs_uuidactor || prs_uuid;
+            if (trx_type === 'INGRESO' && sellerUuid) {
                 if ((finalCommissionRate === undefined || finalCommissionRate === null) && this.personRepository) {
-                    const person = await this.personRepository.findPersonById(prs_uuid);
+                    const person = await this.personRepository.findPersonById(sellerUuid);
                     if (person && person.prs_commissionrate != null) {
                         finalCommissionRate = person.prs_commissionrate;
                     }
@@ -140,6 +147,7 @@ export class TransactionUseCase {
                 target_crduuid,
                 trx_concept,
                 prs_uuid,
+                prs_uuidactor,
                 trx_commissionrate: finalCommissionRate,
                 trx_commissionamount: finalCommissionAmount,
                 trx_notes
@@ -160,6 +168,7 @@ export class TransactionUseCase {
                 target_crduuid: created.target_crduuid,
                 trx_concept: created.trx_concept,
                 prs_uuid: created.prs_uuid,
+                prs_uuidactor: created.prs_uuidactor,
                 trx_commissionrate: created.trx_commissionrate ?? null,
                 trx_commissionamount: created.trx_commissionamount ?? null,
                 trx_notes: created.trx_notes,
@@ -182,6 +191,7 @@ export class TransactionUseCase {
         target_crduuid,
         trx_concept,
         prs_uuid,
+        prs_uuidactor,
         trx_commissionrate,
         trx_commissionamount,
         trx_notes
@@ -195,6 +205,7 @@ export class TransactionUseCase {
         target_crduuid?: string | null;
         trx_concept: string;
         prs_uuid?: string | null;
+        prs_uuidactor?: string | null;
         trx_commissionrate?: number | null;
         trx_commissionamount?: number | null;
         trx_notes?: string | null;
@@ -203,9 +214,11 @@ export class TransactionUseCase {
             let finalCommissionRate = trx_commissionrate;
             let finalCommissionAmount = trx_commissionamount;
 
-            if (trx_type === 'INGRESO' && prs_uuid) {
+            // Regla de Negocio: Cálculo automático de comisión para ingresos con vendedor asociado
+            const sellerUuid = prs_uuidactor || prs_uuid;
+            if (trx_type === 'INGRESO' && sellerUuid) {
                 if ((finalCommissionRate === undefined || finalCommissionRate === null) && this.personRepository) {
-                    const person = await this.personRepository.findPersonById(prs_uuid);
+                    const person = await this.personRepository.findPersonById(sellerUuid);
                     if (person && person.prs_commissionrate != null) {
                         finalCommissionRate = person.prs_commissionrate;
                     }
@@ -226,6 +239,7 @@ export class TransactionUseCase {
                 target_crduuid,
                 trx_concept,
                 prs_uuid,
+                prs_uuidactor,
                 trx_commissionrate: finalCommissionRate,
                 trx_commissionamount: finalCommissionAmount,
                 trx_notes
@@ -245,6 +259,7 @@ export class TransactionUseCase {
                 target_crduuid: updated.target_crduuid,
                 trx_concept: updated.trx_concept,
                 prs_uuid: updated.prs_uuid,
+                prs_uuidactor: updated.prs_uuidactor,
                 trx_commissionrate: updated.trx_commissionrate ?? null,
                 trx_commissionamount: updated.trx_commissionamount ?? null,
                 trx_notes: updated.trx_notes,
@@ -275,6 +290,7 @@ export class TransactionUseCase {
                 target_crduuid: deleted.target_crduuid,
                 trx_concept: deleted.trx_concept,
                 prs_uuid: deleted.prs_uuid,
+                prs_uuidactor: deleted.prs_uuidactor,
                 trx_notes: deleted.trx_notes,
                 trx_createdat: TimezoneConverter.toIsoStringInTimezone(deleted.trx_createdat, 'America/Buenos_Aires'),
                 trx_updatedat: TimezoneConverter.toIsoStringInTimezone(deleted.trx_updatedat, 'America/Buenos_Aires'),

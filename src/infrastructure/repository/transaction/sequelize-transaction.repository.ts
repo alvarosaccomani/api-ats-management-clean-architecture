@@ -26,6 +26,10 @@ export class SequelizeTransactionRepository implements TransactionRepository {
                     {
                         model: SequelizePerson,
                         as: 'prs'
+                    },
+                    {
+                        model: SequelizePerson,
+                        as: 'actor'
                     }
                 ],
                 order: [
@@ -54,6 +58,10 @@ export class SequelizeTransactionRepository implements TransactionRepository {
                     {
                         model: SequelizePerson,
                         as: 'prs'
+                    },
+                    {
+                        model: SequelizePerson,
+                        as: 'actor'
                     }
                 ]
             });
@@ -81,6 +89,7 @@ export class SequelizeTransactionRepository implements TransactionRepository {
                 target_crduuid, 
                 trx_concept, 
                 prs_uuid, 
+                prs_uuidactor,
                 trx_commissionrate,
                 trx_commissionamount,
                 trx_notes, 
@@ -100,6 +109,7 @@ export class SequelizeTransactionRepository implements TransactionRepository {
                 target_crduuid,
                 trx_concept,
                 prs_uuid,
+                prs_uuidactor,
                 trx_commissionrate: trx_commissionrate ?? null,
                 trx_commissionamount: trx_commissionamount ?? null,
                 trx_notes,
@@ -130,6 +140,7 @@ export class SequelizeTransactionRepository implements TransactionRepository {
                     target_crduuid: transaction.target_crduuid,
                     trx_concept: transaction.trx_concept,
                     prs_uuid: transaction.prs_uuid,
+                    prs_uuidactor: transaction.prs_uuidactor,
                     trx_commissionrate: transaction.trx_commissionrate ?? null,
                     trx_commissionamount: transaction.trx_commissionamount ?? null,
                     trx_notes: transaction.trx_notes

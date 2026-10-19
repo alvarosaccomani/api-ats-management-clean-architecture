@@ -14,6 +14,7 @@ export class TransactionValue implements TransactionEntity {
     target_crduuid?: string | null;
     trx_concept: string;
     prs_uuid?: string | null;
+    prs_uuidactor?: string | null;
     trx_commissionrate?: number | null;
     trx_commissionamount?: number | null;
     trx_notes?: string | null;
@@ -32,6 +33,7 @@ export class TransactionValue implements TransactionEntity {
         target_crduuid,
         trx_concept,
         prs_uuid,
+        prs_uuidactor,
         trx_commissionrate,
         trx_commissionamount,
         trx_notes,
@@ -49,6 +51,7 @@ export class TransactionValue implements TransactionEntity {
         target_crduuid?: string | null;
         trx_concept: string;
         prs_uuid?: string | null;
+        prs_uuidactor?: string | null;
         trx_commissionrate?: number | null;
         trx_commissionamount?: number | null;
         trx_notes?: string | null;
@@ -66,6 +69,7 @@ export class TransactionValue implements TransactionEntity {
         this.target_crduuid = target_crduuid && String(target_crduuid).trim() !== '' ? target_crduuid : null;
         this.trx_concept = trx_concept;
         this.prs_uuid = prs_uuid && String(prs_uuid).trim() !== '' ? prs_uuid : null;
+        this.prs_uuidactor = prs_uuidactor && String(prs_uuidactor).trim() !== '' ? prs_uuidactor : null;
         this.trx_commissionrate = trx_commissionrate ?? null;
         this.trx_commissionamount = trx_commissionamount ?? null;
         this.trx_notes = trx_notes ?? null;

@@ -16,6 +16,7 @@ export class SequelizeTransaction extends Model<TransactionEntity, Omit<Transact
   declare target_crduuid?: string | null;
   declare trx_concept: string;
   declare prs_uuid?: string | null;
+  declare prs_uuidactor?: string | null;
   declare trx_commissionrate?: number | null;
   declare trx_commissionamount?: number | null;
   declare trx_notes?: string | null;
@@ -72,6 +73,10 @@ SequelizeTransaction.init({
     type: DataTypes.STRING(40),
     allowNull: true
   },
+  prs_uuidactor: {
+    type: DataTypes.STRING(40),
+    allowNull: true
+  },
   trx_commissionrate: {
     type: DataTypes.FLOAT,
     allowNull: true
@@ -110,4 +115,10 @@ SequelizeTransaction.belongsTo(SequelizePerson, {
   foreignKey: 'prs_uuid',
   targetKey: 'prs_uuid',
   as: 'prs'
+});
+
+SequelizeTransaction.belongsTo(SequelizePerson, {
+  foreignKey: 'prs_uuidactor',
+  targetKey: 'prs_uuid',
+  as: 'actor'
 });
