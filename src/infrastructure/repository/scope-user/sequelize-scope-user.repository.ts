@@ -1,12 +1,20 @@
 import { ScopeUserEntity } from "../../../domain/scope-user/scope-user.entity";
 import { ScopeUserRepository } from "../../../domain/scope-user/scope-user.repository";
 import { SequelizeScopeUser } from "../../model/scope-user/scope-user.model";
+import { SequelizeUser } from "../../model/user/user.model";
 
 export class SequelizeScopeUserRepository implements ScopeUserRepository {
     async getScopeUsers(scp_uuid: string): Promise<ScopeUserEntity[] | null> {
         try {
             const scopeUsers = await SequelizeScopeUser.findAll({
-                where: { scp_uuid }
+                where: { scp_uuid },
+                include: [
+                    {
+                        model: SequelizeUser,
+                        as: 'user',
+                        attributes: ['usr_uuid', 'usr_name', 'usr_surname', 'usr_email']
+                    }
+                ]
             });
             if (!scopeUsers) {
                 return null;

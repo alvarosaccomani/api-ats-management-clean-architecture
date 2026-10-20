@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../db/sequelize';
 import { ScopeUserEntity } from "../../../domain/scope-user/scope-user.entity";
 import { SequelizeScope } from '../scope/scope.model';
+import { SequelizeUser } from '../user/user.model';
 
 export class SequelizeScopeUser extends Model<ScopeUserEntity, Omit<ScopeUserEntity, 'id'>> {
   declare scp_uuid: string;
@@ -46,4 +47,16 @@ SequelizeScope.hasMany(SequelizeScopeUser, {
   foreignKey: 'scp_uuid',
   sourceKey: 'scp_uuid',
   as: 'members'
+});
+
+SequelizeScopeUser.belongsTo(SequelizeUser, {
+  foreignKey: 'usr_uuid',
+  targetKey: 'usr_uuid',
+  as: 'user'
+});
+
+SequelizeUser.hasMany(SequelizeScopeUser, {
+  foreignKey: 'usr_uuid',
+  sourceKey: 'usr_uuid',
+  as: 'scopeUsers'
 });

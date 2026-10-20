@@ -22,6 +22,12 @@ export class ScopeUserUseCase {
                 usr_uuid: su.usr_uuid,
                 scpu_role: su.scpu_role,
                 scpu_createdat: TimezoneConverter.toIsoStringInTimezone(su.scpu_createdat, 'America/Buenos_Aires'),
+                user: su.user ? {
+                    usr_uuid: su.user.usr_uuid,
+                    usr_name: su.user.usr_name,
+                    usr_surname: su.user.usr_surname,
+                    usr_email: su.user.usr_email
+                } : null
             }));
         } catch (error: any) {
             console.error('Error en getScopeUsers (use case):', error.message);
