@@ -1,7 +1,13 @@
 import * as bcrypt from "bcryptjs";
+import { v4 as uuid } from "uuid";
 import { UserEntity, UserUpdateData } from "../../../domain/user/user.entity";
 import { UserRepository } from "../../../domain/user/user.repository";
 import { SequelizeUser } from "../../model/user/user.model";
+import { SequelizeScope } from "../../model/scope/scope.model";
+import { SequelizeScopeUser } from "../../model/scope-user/scope-user.model";
+import { SequelizeBank } from "../../model/bank/bank.model";
+import { SequelizePerson } from "../../model/person/person.model";
+import { sequelize } from "../../db/sequelize";
 import { Op } from 'sequelize';
 
 export class SequelizeRepository implements UserRepository {
@@ -50,12 +56,14 @@ export class SequelizeRepository implements UserRepository {
         }
     }
     async registerUser(user: UserEntity): Promise<UserEntity | null> {
+        const t = await sequelize.transaction();
         try {
             let { usr_uuid, usr_name, usr_surname, usr_password, usr_image, usr_email, usr_nick, usr_bio, usr_socket, usr_online, usr_createdat, usr_updatedat } = user;
 
             const salt = await bcrypt.genSalt(10);
             usr_password = await bcrypt.hash(usr_password, salt);
 
+            // 1. Crear el usuario
             const result = await SequelizeUser.create({
                 usr_uuid,
                 usr_name,
@@ -69,11 +77,67 @@ export class SequelizeRepository implements UserRepository {
                 usr_online: usr_online || false,
                 usr_createdat,
                 usr_updatedat
-            });
+            }, { transaction: t });
 
-            return result ? (result.dataValues as any) : null;
+            if (!result) {
+                throw new Error('No se pudo registrar el usuario.');
+            }
+
+            const now = new Date();
+
+            // 2. Crear Ámbito Inicial "Personal"
+            const scp_uuid = uuid();
+            await SequelizeScope.create({
+                scp_uuid,
+                scp_name: 'Personal',
+                scp_description: 'Ámbito contable personal predeterminado',
+                scp_isshared: false,
+                scp_color: '#1890ff',
+                scp_icon: 'user',
+                usr_uuidowner: usr_uuid,
+                scp_active: true,
+                scp_createdat: now,
+                scp_updatedat: now
+            }, { transaction: t });
+
+            // 3. Vincular usuario como OWNER en ScopeUsers
+            await SequelizeScopeUser.create({
+                scp_uuid,
+                usr_uuid,
+                scpu_role: 'OWNER',
+                scpu_createdat: now
+            }, { transaction: t });
+
+            // 4. Crear Banco / Caja Inicial "Efectivo"
+            const ban_uuid = uuid();
+            await SequelizeBank.create({
+                usr_uuid,
+                ban_uuid,
+                ban_name: 'Efectivo',
+                ban_description: 'Caja de efectivo / billetera',
+                ban_createdat: now,
+                ban_updatedat: now
+            }, { transaction: t });
+
+            // 5. Crear Persona propia vinculada dentro del ámbito
+            const prs_uuid = uuid();
+            const personName = `${usr_name || ''} ${usr_surname || ''}`.trim() || usr_nick || 'Titular';
+            await SequelizePerson.create({
+                prs_uuid,
+                scp_uuid,
+                usr_uuidlinked: usr_uuid,
+                prs_name: personName,
+                prs_type: 'SOCIO',
+                prs_active: true,
+                prs_createdat: now,
+                prs_updatedat: now
+            }, { transaction: t });
+
+            await t.commit();
+            return result.dataValues as any;
         } catch (error: any) {
-            console.error('Error en registerUser:', error.message);
+            await t.rollback();
+            console.error('Error en registerUser (con onboarding seed):', error.message);
             throw error;
         }
     }
