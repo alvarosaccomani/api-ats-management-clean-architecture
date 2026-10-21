@@ -24,8 +24,7 @@ SequelizeBank.init({
   },
   ban_name: {
     type: DataTypes.STRING(100),
-    allowNull: false,
-    unique: true
+    allowNull: false
   },
   ban_description: {
     type: DataTypes.TEXT,
