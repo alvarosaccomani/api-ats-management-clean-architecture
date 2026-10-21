@@ -17,6 +17,7 @@ export class SequelizeTransaction extends Model<TransactionEntity, Omit<Transact
   declare trx_concept: string;
   declare prs_uuid?: string | null;
   declare prs_uuidactor?: string | null;
+  declare fex_uuid?: string | null;
   declare trx_commissionrate?: number | null;
   declare trx_commissionamount?: number | null;
   declare trx_notes?: string | null;
@@ -74,6 +75,10 @@ SequelizeTransaction.init({
     allowNull: true
   },
   prs_uuidactor: {
+    type: DataTypes.STRING(40),
+    allowNull: true
+  },
+  fex_uuid: {
     type: DataTypes.STRING(40),
     allowNull: true
   },
