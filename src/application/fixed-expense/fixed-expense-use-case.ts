@@ -25,6 +25,15 @@ export class FixedExpenseUseCase {
     }
 
     public async createFixedExpense(data: any): Promise<FixedExpenseEntity> {
+        if (!data.scp_uuid || typeof data.scp_uuid !== 'string' || !data.scp_uuid.trim()) {
+            throw new Error('El ámbito contable (scp_uuid) es obligatorio para registrar un gasto fijo.');
+        }
+        if (!data.usr_uuid || typeof data.usr_uuid !== 'string' || !data.usr_uuid.trim()) {
+            throw new Error('El usuario creador (usr_uuid) es obligatorio.');
+        }
+        if (!data.fex_name || typeof data.fex_name !== 'string' || !data.fex_name.trim()) {
+            throw new Error('El nombre del gasto o servicio es obligatorio.');
+        }
         const fixedExpenseValue = new FixedExpenseValue(data);
         return await this.fixedExpenseRepository.createFixedExpense(fixedExpenseValue);
     }
