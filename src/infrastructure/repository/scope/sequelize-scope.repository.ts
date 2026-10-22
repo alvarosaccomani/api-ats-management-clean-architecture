@@ -8,16 +8,19 @@ export class SequelizeScopeRepository implements ScopeRepository {
     async getScopes(usr_uuid: string): Promise<ScopeEntity[] | null> {
         try {
             const scopeUsers = await SequelizeScopeUser.findAll({
-                where: { usr_uuid }
+                where: { usr_uuid },
+                attributes: ['scp_uuid']
             });
+
+            if (!scopeUsers || scopeUsers.length === 0) {
+                return [];
+            }
+
             const allowedScopeUuids = scopeUsers.map(su => su.scp_uuid);
 
             const scopes = await SequelizeScope.findAll({
                 where: {
-                    [Op.or]: [
-                        { usr_uuidowner: usr_uuid },
-                        { scp_uuid: { [Op.in]: allowedScopeUuids } }
-                    ],
+                    scp_uuid: { [Op.in]: allowedScopeUuids },
                     scp_active: true
                 },
                 order: [
@@ -25,7 +28,7 @@ export class SequelizeScopeRepository implements ScopeRepository {
                 ]
             });
             if (!scopes) {
-                throw new Error(`No hay ámbitos registrados`);
+                return [];
             }
             return scopes.map(s => s.get({ plain: true }) as ScopeEntity);
         } catch (error: any) {
