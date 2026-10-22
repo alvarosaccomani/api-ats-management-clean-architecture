@@ -16,8 +16,7 @@ export class SequelizeScopeRepository implements ScopeRepository {
                 where: {
                     [Op.or]: [
                         { usr_uuidowner: usr_uuid },
-                        { scp_uuid: { [Op.in]: allowedScopeUuids } },
-                        { scp_isshared: true }
+                        { scp_uuid: { [Op.in]: allowedScopeUuids } }
                     ],
                     scp_active: true
                 },
