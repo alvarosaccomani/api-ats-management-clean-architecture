@@ -1,18 +1,40 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize, Op } from 'sequelize';
 import { sequelize } from '../../db/sequelize';
 import { TransactionEntity, TransactionUpdateData } from "../../../domain/transaction/transaction.entity";
 import { TransactionRepository } from "../../../domain/transaction/transaction.repository";
 import { SequelizeTransaction } from "../../model/transaction/transaction.model";
 import { SequelizePerson } from '../../model/person/person.model';
 import { SequelizeScope } from '../../model/scope/scope.model';
+import { SequelizeScopeUser } from '../../model/scope-user/scope-user.model';
 
 export class SequelizeTransactionRepository implements TransactionRepository {
-    async getTransactions(scp_uuid: string, trx_type?: string): Promise<TransactionEntity[] | null> {
+    async getTransactions(usr_uuid: string, scp_uuid?: string, trx_type?: string): Promise<TransactionEntity[] | null> {
         try {
-            const whereCondition: any = {};
-            if (scp_uuid && scp_uuid !== 'ALL') {
-                whereCondition.scp_uuid = scp_uuid;
+            // 1. Obtener los ámbitos donde el usuario tiene acceso
+            const scopeUsers = await SequelizeScopeUser.findAll({
+                where: { usr_uuid },
+                attributes: ['scp_uuid']
+            });
+
+            if (!scopeUsers || scopeUsers.length === 0) {
+                return [];
             }
+
+            const allowedScopeUuids = scopeUsers.map(su => su.scp_uuid);
+
+            // 2. Determinar los ámbitos objetivo
+            let targetScopeUuids = allowedScopeUuids;
+            if (scp_uuid && scp_uuid !== 'ALL') {
+                if (!allowedScopeUuids.includes(scp_uuid)) {
+                    return []; // No tiene acceso al ámbito solicitado
+                }
+                targetScopeUuids = [scp_uuid];
+            }
+
+            // 3. Filtrar las transacciones por los ámbitos autorizados
+            const whereCondition: any = {
+                scp_uuid: { [Op.in]: targetScopeUuids }
+            };
             if (trx_type) {
                 whereCondition.trx_type = trx_type;
             }
@@ -90,9 +112,9 @@ export class SequelizeTransactionRepository implements TransactionRepository {
                 target_crduuid, 
                 trx_concept, 
                 prs_uuid, 
-                prs_uuidactor,
-                trx_commissionrate,
-                trx_commissionamount,
+                prs_uuidactor, 
+                trx_commissionrate, 
+                trx_commissionamount, 
                 trx_notes, 
                 trx_createdat, 
                 trx_updatedat 

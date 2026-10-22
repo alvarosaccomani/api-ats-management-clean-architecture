@@ -13,9 +13,10 @@ export class TransactionController {
 
     public async getAllCtrl(req: Request, res: Response) {
         try {
-            const { scp_uuid } = req.params;
+            const usr_uuid = req.params.usr_uuid;
+            const scp_uuid = req.params.scp_uuid || 'ALL';
             const { trx_type } = req.query;
-            const transactions = await this.transactionUseCase.getTransactions(scp_uuid, trx_type as string);
+            const transactions = await this.transactionUseCase.getTransactions(usr_uuid, scp_uuid, trx_type as string);
             res.status(200).send({ success: true, data: transactions });
         } catch (error: any) {
             res.status(500).send({ success: false, error: error.message });

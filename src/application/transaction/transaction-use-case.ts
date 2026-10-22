@@ -16,9 +16,9 @@ export class TransactionUseCase {
         this.deleteTransaction = this.deleteTransaction.bind(this);
     }
 
-    public async getTransactions(scp_uuid: string, trx_type?: string) {
+    public async getTransactions(usr_uuid: string, scp_uuid?: string, trx_type?: string) {
         try {
-            const transactions = await this.transactionRepository.getTransactions(scp_uuid, trx_type);
+            const transactions = await this.transactionRepository.getTransactions(usr_uuid, scp_uuid, trx_type);
             if (!transactions) {
                 return [];
             }

@@ -60,7 +60,7 @@ function configureTransactionRoutes(app: Express, socketAdapter: SocketAdapter) 
      *             schema:
      *               $ref: '#/components/schemas/ErrorResponse'
      */
-    app.get(`${apiPrefix}/transactions/:scp_uuid`, transactionCtrl.getAllCtrl);
+    app.get(`${apiPrefix}/transactions/:usr_uuid/:scp_uuid?`, transactionCtrl.getAllCtrl);
 
     /**
      * @swagger
