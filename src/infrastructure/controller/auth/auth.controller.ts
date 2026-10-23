@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AuthUseCase } from "../../../application/auth/auth-use-case";
 import { UserUseCase } from "../../../application/user/user-use-case";
+import { SequelizeUser } from "../../model/user/user.model";
 
 export class AuthController {
     constructor(
@@ -207,16 +208,34 @@ export class AuthController {
             let localUser;
             try {
                 localUser = await this.userUseCase.getDetailUser(centralUser.usr_uuid);
+                // Si el usuario local ya existe pero su nick u otros datos difieren del central, sincronizamos
+                if (localUser && centralUser.usr_nick && localUser.usr_nick !== centralUser.usr_nick) {
+                    try {
+                        await SequelizeUser.update({
+                            usr_nick: centralUser.usr_nick,
+                            usr_name: centralUser.usr_name || localUser.usr_name,
+                            usr_surname: centralUser.usr_surname || localUser.usr_surname,
+                            usr_email: centralUser.usr_email || localUser.usr_email,
+                            usr_image: centralUser.usr_image || localUser.usr_image || '',
+                            usr_bio: centralUser.usr_bio || localUser.usr_bio || 'Federated SSO User'
+                        }, {
+                            where: { usr_uuid: centralUser.usr_uuid }
+                        });
+                        localUser = await this.userUseCase.getDetailUser(centralUser.usr_uuid);
+                    } catch (syncErr: any) {
+                        console.warn('[SSO] No se pudo sincronizar usuario existente con datos de ATS Central:', syncErr.message);
+                    }
+                }
             } catch (err: any) {
                 const newUser = {
                     usr_uuid: centralUser.usr_uuid,
                     usr_name: centralUser.usr_name,
                     usr_surname: centralUser.usr_surname,
                     usr_password: 'sso_federated_user_no_password_access_key',
-                    usr_image: '',
+                    usr_image: centralUser.usr_image || '',
                     usr_email: centralUser.usr_email,
-                    usr_nick: centralUser.usr_email.split('@')[0],
-                    usr_bio: 'Federated SSO User',
+                    usr_nick: centralUser.usr_nick || (centralUser.usr_email ? centralUser.usr_email.split('@')[0] : 'user'),
+                    usr_bio: centralUser.usr_bio || 'Federated SSO User',
                     usr_registered: new Date(),
                     usr_socket: '',
                     usr_online: false,
