@@ -1,10 +1,13 @@
 import { PendingVoucherRepository } from "../../domain/pending-voucher/pending-voucher.repository";
 import { PendingVoucherValue } from "../../domain/pending-voucher/pending-voucher.value";
 import { TimezoneConverter } from "../../infrastructure/utils/TimezoneConverter";
+import { IStorageService } from "../../domain/storage/storage.service";
 
 export class PendingVoucherUseCase {
     constructor(
-        private readonly pendingVoucherRepository: PendingVoucherRepository
+        private readonly pendingVoucherRepository: PendingVoucherRepository,
+        private readonly storageService?: IStorageService,
+        private readonly privateBucketName: string = process.env.R2_BUCKET_PRIVATE || 'ats-private-vault'
     ) {
         this.getPendingVouchers = this.getPendingVouchers.bind(this);
         this.getDetailPendingVoucher = this.getDetailPendingVoucher.bind(this);
@@ -105,9 +108,22 @@ export class PendingVoucherUseCase {
 
     public async deletePendingVoucher(usr_uuid: string, pevou_uuid: string) {
         try {
-            const pendingVoucherDeleted = await this.pendingVoucherRepository.deletePendingVoucher(usr_uuid,pevou_uuid);
-            if(!pendingVoucherDeleted) {
+            const pendingVoucherDeleted = await this.pendingVoucherRepository.deletePendingVoucher(usr_uuid, pevou_uuid);
+            if (!pendingVoucherDeleted) {
                 throw new Error(`No se pudo eliminar el comprobante pendiente.`);
+            }
+
+            // Si el comprobante tenía una imagen en Cloudflare R2, eliminar el objeto del bucket
+            const imageKey = pendingVoucherDeleted.pevou_image;
+            if (this.storageService && imageKey && !imageKey.startsWith('data:') && !imageKey.startsWith('http://') && !imageKey.startsWith('https://')) {
+                try {
+                    await this.storageService.deleteFile({
+                        bucket: this.privateBucketName,
+                        key: imageKey,
+                    });
+                } catch (storageError: any) {
+                    console.error(`Advertencia: No se pudo eliminar el archivo ${imageKey} de Cloudflare R2:`, storageError.message);
+                }
             }
             return {
                 usr_uuid: pendingVoucherDeleted.usr_uuid,
@@ -138,3 +154,5 @@ export class PendingVoucherUseCase {
         }
     }
 }
+
+
