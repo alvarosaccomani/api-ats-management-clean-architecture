@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../db/sequelize';
-import { ScopeEntity } from "../../../domain/scope/scope.entity";
+import { ScopeEntity, ScopeSettings } from "../../../domain/scope/scope.entity";
 
 export class SequelizeScope extends Model<ScopeEntity, Omit<ScopeEntity, 'id'>> {
   declare scp_uuid: string;
@@ -10,6 +10,7 @@ export class SequelizeScope extends Model<ScopeEntity, Omit<ScopeEntity, 'id'>> 
   declare scp_color?: string | null;
   declare scp_icon?: string | null;
   declare usr_uuidowner: string;
+  declare scp_settings?: ScopeSettings;
   declare scp_active: boolean;
   declare scp_createdat: Date;
   declare scp_updatedat: Date;
@@ -47,6 +48,15 @@ SequelizeScope.init({
   usr_uuidowner: {
     type: DataTypes.STRING(40),
     allowNull: false
+  },
+  scp_settings: {
+    type: DataTypes.JSONB,
+    allowNull: false,
+    defaultValue: {
+      expense_keywords: [],
+      barter_keywords: [],
+      infer_type_from_concept: true
+    }
   },
   scp_active: {
     type: DataTypes.BOOLEAN,

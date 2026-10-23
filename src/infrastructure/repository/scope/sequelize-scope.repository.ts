@@ -54,7 +54,7 @@ export class SequelizeScopeRepository implements ScopeRepository {
 
     async createScope(scope: ScopeEntity): Promise<ScopeEntity | null> {
         try {
-            const { scp_uuid, scp_name, scp_description, scp_isshared, scp_color, scp_icon, usr_uuidowner, scp_active, scp_createdat, scp_updatedat } = scope;
+            const { scp_uuid, scp_name, scp_description, scp_isshared, scp_color, scp_icon, usr_uuidowner, scp_settings, scp_active, scp_createdat, scp_updatedat } = scope;
             const result = await SequelizeScope.create({
                 scp_uuid,
                 scp_name,
@@ -63,6 +63,11 @@ export class SequelizeScopeRepository implements ScopeRepository {
                 scp_color,
                 scp_icon,
                 usr_uuidowner,
+                scp_settings: scp_settings ?? {
+                    expense_keywords: [],
+                    barter_keywords: [],
+                    infer_type_from_concept: true
+                },
                 scp_active: scp_active ?? true,
                 scp_createdat,
                 scp_updatedat
@@ -88,15 +93,20 @@ export class SequelizeScopeRepository implements ScopeRepository {
 
     async updateScope(scp_uuid: string, scope: ScopeUpdateData): Promise<ScopeEntity | null> {
         try {
+            const updatePayload: any = {
+                scp_name: scope.scp_name,
+                scp_description: scope.scp_description,
+                scp_isshared: scope.scp_isshared,
+                scp_color: scope.scp_color,
+                scp_icon: scope.scp_icon,
+                scp_active: scope.scp_active
+            };
+            if (scope.scp_settings !== undefined) {
+                updatePayload.scp_settings = scope.scp_settings;
+            }
+
             const [updatedCount, [updatedScope]] = await SequelizeScope.update(
-                {
-                    scp_name: scope.scp_name,
-                    scp_description: scope.scp_description,
-                    scp_isshared: scope.scp_isshared,
-                    scp_color: scope.scp_color,
-                    scp_icon: scope.scp_icon,
-                    scp_active: scope.scp_active
-                },
+                updatePayload,
                 {
                     where: { scp_uuid },
                     returning: true,

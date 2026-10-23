@@ -95,6 +95,11 @@ export class SequelizeRepository implements UserRepository {
                 scp_color: '#1890ff',
                 scp_icon: 'user',
                 usr_uuidowner: usr_uuid,
+                scp_settings: {
+                    expense_keywords: [],
+                    barter_keywords: [],
+                    infer_type_from_concept: true
+                },
                 scp_active: true,
                 scp_createdat: now,
                 scp_updatedat: now

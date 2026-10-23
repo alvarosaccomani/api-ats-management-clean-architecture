@@ -1,5 +1,6 @@
 import { ScopeRepository } from "../../domain/scope/scope.repository";
 import { ScopeValue } from "../../domain/scope/scope.value";
+import { ScopeSettings } from "../../domain/scope/scope.entity";
 import { TimezoneConverter } from "../../infrastructure/utils/TimezoneConverter";
 
 export class ScopeUseCase {
@@ -27,6 +28,7 @@ export class ScopeUseCase {
                 scp_color: scope.scp_color,
                 scp_icon: scope.scp_icon,
                 usr_uuidowner: scope.usr_uuidowner,
+                scp_settings: scope.scp_settings,
                 scp_active: scope.scp_active,
                 scp_createdat: TimezoneConverter.toIsoStringInTimezone(scope.scp_createdat, 'America/Buenos_Aires'),
                 scp_updatedat: TimezoneConverter.toIsoStringInTimezone(scope.scp_updatedat, 'America/Buenos_Aires'),
@@ -51,6 +53,7 @@ export class ScopeUseCase {
                 scp_color: scope.scp_color,
                 scp_icon: scope.scp_icon,
                 usr_uuidowner: scope.usr_uuidowner,
+                scp_settings: scope.scp_settings,
                 scp_active: scope.scp_active,
                 scp_createdat: TimezoneConverter.toIsoStringInTimezone(scope.scp_createdat, 'America/Buenos_Aires'),
                 scp_updatedat: TimezoneConverter.toIsoStringInTimezone(scope.scp_updatedat, 'America/Buenos_Aires'),
@@ -69,6 +72,7 @@ export class ScopeUseCase {
         scp_color,
         scp_icon,
         usr_uuidowner,
+        scp_settings,
         scp_active
     }: {
         scp_uuid?: string;
@@ -78,6 +82,7 @@ export class ScopeUseCase {
         scp_color?: string | null;
         scp_icon?: string | null;
         usr_uuidowner: string;
+        scp_settings?: ScopeSettings;
         scp_active?: boolean;
     }) {
         try {
@@ -93,6 +98,7 @@ export class ScopeUseCase {
                 scp_color,
                 scp_icon,
                 usr_uuidowner,
+                scp_settings,
                 scp_active
             });
             const scopeCreated = await this.scopeRepository.createScope(scopeValue);
@@ -107,6 +113,7 @@ export class ScopeUseCase {
                 scp_color: scopeCreated.scp_color,
                 scp_icon: scopeCreated.scp_icon,
                 usr_uuidowner: scopeCreated.usr_uuidowner,
+                scp_settings: scopeCreated.scp_settings,
                 scp_active: scopeCreated.scp_active,
                 scp_createdat: TimezoneConverter.toIsoStringInTimezone(scopeCreated.scp_createdat, 'America/Buenos_Aires'),
                 scp_updatedat: TimezoneConverter.toIsoStringInTimezone(scopeCreated.scp_updatedat, 'America/Buenos_Aires'),
@@ -123,6 +130,7 @@ export class ScopeUseCase {
         scp_isshared,
         scp_color,
         scp_icon,
+        scp_settings,
         scp_active
     }: {
         scp_name: string;
@@ -130,6 +138,7 @@ export class ScopeUseCase {
         scp_isshared: boolean;
         scp_color?: string | null;
         scp_icon?: string | null;
+        scp_settings?: ScopeSettings;
         scp_active: boolean;
     }) {
         try {
@@ -143,6 +152,7 @@ export class ScopeUseCase {
                 scp_isshared,
                 scp_color,
                 scp_icon,
+                scp_settings,
                 scp_active
             });
             if (!scopeUpdated) {
@@ -156,6 +166,7 @@ export class ScopeUseCase {
                 scp_color: scopeUpdated.scp_color,
                 scp_icon: scopeUpdated.scp_icon,
                 usr_uuidowner: scopeUpdated.usr_uuidowner,
+                scp_settings: scopeUpdated.scp_settings,
                 scp_active: scopeUpdated.scp_active,
                 scp_createdat: TimezoneConverter.toIsoStringInTimezone(scopeUpdated.scp_createdat, 'America/Buenos_Aires'),
                 scp_updatedat: TimezoneConverter.toIsoStringInTimezone(scopeUpdated.scp_updatedat, 'America/Buenos_Aires'),

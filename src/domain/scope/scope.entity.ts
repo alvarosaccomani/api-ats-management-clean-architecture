@@ -1,3 +1,10 @@
+export interface ScopeSettings {
+    expense_keywords?: string[];
+    barter_keywords?: string[];
+    infer_type_from_concept?: boolean;
+    [key: string]: any;
+}
+
 export interface ScopeEntity {
     scp_uuid: string;
     scp_name: string;
@@ -6,6 +13,7 @@ export interface ScopeEntity {
     scp_color?: string | null;
     scp_icon?: string | null;
     usr_uuidowner: string;
+    scp_settings?: ScopeSettings;
     scp_active: boolean;
     scp_createdat: Date;
     scp_updatedat: Date;
@@ -17,5 +25,6 @@ export type ScopeUpdateData = Pick<ScopeEntity,
     'scp_isshared' | 
     'scp_color' | 
     'scp_icon' | 
+    'scp_settings' |
     'scp_active'
 >;
