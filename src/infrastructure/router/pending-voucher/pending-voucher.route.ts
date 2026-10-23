@@ -3,6 +3,7 @@ import { SequelizePendingVoucherRepository } from "../../repository/pending-vouc
 import { PendingVoucherUseCase } from "../../../application/pending-voucher/pending-voucher-use-case";
 import { PendingVoucherController } from "../../controller/pending-voucher/pending-voucher.controller";
 import SocketAdapter from "../../services/socketAdapter";
+import { R2StorageService } from "../../services/r2-storage.service";
 
 function configurePendingVoucherRoutes(app: Express, socketAdapter: SocketAdapter) {
     /*
@@ -15,7 +16,8 @@ function configurePendingVoucherRoutes(app: Express, socketAdapter: SocketAdapte
     *   Iniciar casos de uso
     */
     
-    const pendingVoucherUseCase = new PendingVoucherUseCase(sequelizePendingVoucherRepository);
+    const r2StorageService = new R2StorageService();
+    const pendingVoucherUseCase = new PendingVoucherUseCase(sequelizePendingVoucherRepository, r2StorageService, r2StorageService.privateBucket);
     
     /*
     *   Iniciar controller
