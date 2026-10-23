@@ -23,6 +23,11 @@ export class R2StorageService implements IStorageService {
         const accessKeyId = process.env.R2_ACCESS_KEY_ID || '';
         const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY || '';
 
+        if (!accountId || !accessKeyId || !secretAccessKey) {
+            console.error('Error crítico: Faltan variables de entorno para Cloudflare R2 (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID o R2_SECRET_ACCESS_KEY no están definidas en el servidor).');
+            throw new Error('Configuración de almacenamiento incompleta en el servidor: verifique R2_ACCOUNT_ID, R2_ACCESS_KEY_ID y R2_SECRET_ACCESS_KEY en su archivo .env');
+        }
+
         this.publicBucket = process.env.R2_BUCKET_PUBLIC || 'ats-public-assets';
         this.privateBucket = process.env.R2_BUCKET_PRIVATE || 'ats-private-vault';
         this.publicUrl = (process.env.R2_PUBLIC_URL || '').replace(/\/$/, '');
