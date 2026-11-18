@@ -86,9 +86,30 @@ export class PendingVoucherUseCase {
 
     public async updatePendingVoucher(usr_uuid: string, pevou_uuid: string, { pevou_name, pevou_image, pevou_unreadcontent, pevou_unreadtext } : { pevou_name: string, pevou_image: string, pevou_unreadcontent: string, pevou_unreadtext: string }) {
         try {
+            // Si se actualiza la imagen, obtener la clave anterior para limpiarla de Cloudflare R2
+            let oldImageKey: string | null = null;
+            if (pevou_image) {
+                const currentVoucher = await this.pendingVoucherRepository.findPendingVoucherById(usr_uuid, pevou_uuid);
+                if (currentVoucher && currentVoucher.pevou_image && currentVoucher.pevou_image !== pevou_image) {
+                    oldImageKey = currentVoucher.pevou_image;
+                }
+            }
+
             const pendingVoucherUpdated = await this.pendingVoucherRepository.updatePendingVoucher(usr_uuid, pevou_uuid, { pevou_name, pevou_image, pevou_unreadcontent, pevou_unreadtext });
-            if(!pendingVoucherUpdated) {
+            if (!pendingVoucherUpdated) {
                 throw new Error(`No se pudo actualizar el comprobante pendiente.`);
+            }
+
+            // Si cambió la imagen y la anterior residía en R2, eliminarla para evitar almacenamiento huérfano
+            if (this.storageService && oldImageKey && !oldImageKey.startsWith('data:') && !oldImageKey.startsWith('http://') && !oldImageKey.startsWith('https://')) {
+                try {
+                    await this.storageService.deleteFile({
+                        bucket: this.privateBucketName,
+                        key: oldImageKey,
+                    });
+                } catch (storageError: any) {
+                    console.error(`Advertencia: No se pudo eliminar la imagen anterior ${oldImageKey} de Cloudflare R2:`, storageError.message);
+                }
             }
             return {
                 usr_uuid: pendingVoucherUpdated.usr_uuid,
