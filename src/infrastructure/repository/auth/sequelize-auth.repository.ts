@@ -1,19 +1,23 @@
 import * as bcrypt from "bcryptjs";
+import { Op } from "sequelize";
 import { UserEntity } from "../../../domain/user/user.entity";
 import { AuthRepository } from "../../../domain/auth/auth.repository";
 import { SequelizeUser } from "../../model/user/user.model";
 import { createToken } from "../../services/jwt.service";
 
 export class SequelizeAuthRepository implements AuthRepository {
-    async loginUser(usr_nick: string, usr_password: string, gettoken: boolean): Promise<UserEntity | string | null> {
+    async loginUser(identifier: string, usr_password: string, gettoken: boolean): Promise<UserEntity | string | null> {
         try {
             const user = await SequelizeUser.findOne({ 
                 where: { 
-                    usr_nick: usr_nick ?? null
+                    [Op.or]: [
+                        { usr_nick: identifier ?? null },
+                        { usr_email: identifier ?? null }
+                    ]
                 }
             });            
             if(!user) {
-                throw new Error(`No hay usuario con el nombre ${usr_nick}`);
+                throw new Error(`No hay usuario registrado con el usuario o correo '${identifier}'`);
             }
             
             const isPasswordValid = await bcrypt.compare(usr_password, user.dataValues.usr_password);

@@ -10,9 +10,9 @@ export class AuthUseCase {
         this.updatePassword = this.updatePassword.bind(this);
     }
 
-    public async loginUser(usr_nick: string, usr_password: string, gettoken: boolean) {
+    public async loginUser(identifier: string, usr_password: string, gettoken: boolean) {
         try {
-            const user = await this.authRepository.loginUser(usr_nick, usr_password, gettoken);
+            const user = await this.authRepository.loginUser(identifier, usr_password, gettoken);
             if (!user) {
                 throw new Error('Credenciales incorrectas.');
             }
